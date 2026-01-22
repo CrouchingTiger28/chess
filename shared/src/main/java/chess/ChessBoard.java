@@ -3,6 +3,7 @@ package chess;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.lang.StringBuilder;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -70,5 +71,28 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(squares);
+    }
+
+    public String toString() {
+        StringBuilder rank;
+        StringBuilder stack = new StringBuilder();
+
+        for (int y = 1; y <= 8; y++) {
+            rank = new StringBuilder();
+            for (int x = 1; x <= 8; x++) {
+                rank.append("|");
+                if (this.getPiece(new ChessPosition(y, x)) != null) {
+                    rank.append(this.getPiece(new ChessPosition(y, x)).toString());
+                } else {
+                    rank.append(" ");
+                }
+            }
+            rank.append("|");
+
+            stack.append(rank);
+            stack.append("\n");
+        }
+
+        return stack.toString();
     }
 }

@@ -90,6 +90,6 @@ public class ChessPiece {
                 case PieceType.KING -> "k";
             };
         }
-        return null;
+        return " ";
     }
 }
