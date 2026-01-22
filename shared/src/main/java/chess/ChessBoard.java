@@ -55,7 +55,7 @@ public class ChessBoard {
             addPiece(new ChessPosition(1, x), new ChessPiece(ChessGame.TeamColor.WHITE, setupOrder.get(x - 1)));
             addPiece(new ChessPosition(2, x), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
             addPiece(new ChessPosition(7, x), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
-            addPiece(new ChessPosition(8, x), new ChessPiece(ChessGame.TeamColor.BLACK, setupOrder.get(8 - x)));
+            addPiece(new ChessPosition(8, x), new ChessPiece(ChessGame.TeamColor.BLACK, setupOrder.get(x - 1)));
         }
     }
 
