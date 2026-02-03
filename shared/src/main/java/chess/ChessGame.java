@@ -10,15 +10,19 @@ import java.util.Collection;
  */
 public class ChessGame {
 
+    private TeamColor colorTurn;
+    private ChessBoard board;
     public ChessGame() {
-
+        colorTurn = TeamColor.WHITE;
+        board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return colorTurn;
     }
 
     /**
@@ -27,7 +31,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        colorTurn = team;
     }
 
     /**
@@ -59,6 +63,21 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
+
+
+    private ChessPosition findKing(TeamColor teamColor) {
+        for (int x = 1; x <= 8; x++) {
+            for (int y =1; y <= 8; y++) {
+                ChessPosition position = new ChessPosition(y, x);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                    return position;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Determines if the given team is in check
      *
@@ -66,7 +85,22 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = findKing(teamColor);
+
+        for (int x = 1; x <= 8; x++) {
+            for (int y =1; y <= 8; y++) {
+                ChessPosition piecePosition = new ChessPosition(y, x);
+                ChessPiece myPiece = board.getPiece(piecePosition);
+                if (myPiece != null && myPiece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> moves = myPiece.pieceMoves(board, piecePosition);
+                    if (moves.contains(new ChessMove(piecePosition, kingPosition, null)) ||
+                            moves.contains(new ChessMove(piecePosition, kingPosition, ChessPiece.PieceType.QUEEN))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -96,7 +130,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
