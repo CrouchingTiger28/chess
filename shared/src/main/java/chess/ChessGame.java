@@ -1,5 +1,8 @@
 package chess;
 
+import jdk.jshell.spi.ExecutionControl;
+
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -60,10 +63,17 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        ChessPiece piece = board.getPiece(move.getStartPosition());
-        board.addPiece(move.getStartPosition(), null);
-        board.addPiece(move.getEndPosition(), piece);
-        colorTurn = (colorTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        if (board.getPiece(move.getStartPosition()).getTeamColor() != colorTurn) {
+            throw new InvalidMoveException("Not player's turn");
+        }
+        if (validMoves(move.getStartPosition()).contains(move)) {
+            ChessPiece piece = board.getPiece(move.getStartPosition());
+            board.addPiece(move.getStartPosition(), null);
+            board.addPiece(move.getEndPosition(), piece);
+            colorTurn = (colorTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        } else {
+            throw new InvalidMoveException("Move not valid");
+        }
     }
 
 
@@ -81,21 +91,16 @@ public class ChessGame {
         return null;
     }
 
-    /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
-     */
-    public boolean isInCheck(TeamColor teamColor) {
+
+    private boolean checkCheck(TeamColor teamColor, ChessBoard myBoard) {
         ChessPosition kingPosition = findKing(teamColor);
 
         for (int x = 1; x <= 8; x++) {
             for (int y =1; y <= 8; y++) {
                 ChessPosition piecePosition = new ChessPosition(y, x);
-                ChessPiece myPiece = board.getPiece(piecePosition);
+                ChessPiece myPiece = myBoard.getPiece(piecePosition);
                 if (myPiece != null && myPiece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = myPiece.pieceMoves(board, piecePosition);
+                    Collection<ChessMove> moves = myPiece.pieceMoves(myBoard, piecePosition);
                     if (moves.contains(new ChessMove(piecePosition, kingPosition, null)) ||
                             moves.contains(new ChessMove(piecePosition, kingPosition, ChessPiece.PieceType.QUEEN))) {
                         return true;
@@ -104,6 +109,15 @@ public class ChessGame {
             }
         }
         return false;
+    }
+    /**
+     * Determines if the given team is in check
+     *
+     * @param teamColor which team to check for check
+     * @return True if the specified team is in check
+     */
+    public boolean isInCheck(TeamColor teamColor) {
+        return checkCheck(teamColor, board);
     }
 
     /**
@@ -115,10 +129,20 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         if (isInCheck(teamColor)) {
             ChessPosition kingPosition = findKing(teamColor);
+            Collection<ChessMove> validKingMoves = new ArrayList<>();
+            Collection<ChessMove> invalidKingMoves = new ArrayList<>();
 
             for (ChessMove move : board.getPiece(kingPosition).pieceMoves(board, kingPosition)) {
-                if ()
+                ChessBoard boardCopy = board.deepCopy();
+                boardCopy.addPiece(kingPosition, null);
+                boardCopy.addPiece(move.getEndPosition(), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
+                if (!checkCheck(teamColor, boardCopy)) {
+                    validKingMoves.add(move);
+                } else {
+                    invalidKingMoves.add(move);
+                }
             }
+            return (validKingMoves.isEmpty());
         } else {
             return false;
         }
@@ -132,7 +156,11 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

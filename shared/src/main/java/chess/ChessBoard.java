@@ -59,6 +59,17 @@ public class ChessBoard {
         }
     }
 
+    public ChessBoard deepCopy() {
+        ChessBoard result = new ChessBoard();
+        for (int x = 1; x<= 8; x++) {
+            for (int y = 1; y <= 8; y++) {
+                ChessPosition place = new ChessPosition(y, x);
+                result.addPiece(place, this.getPiece(place));
+            }
+        }
+        return result;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
