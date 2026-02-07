@@ -4,6 +4,7 @@ import jdk.jshell.spi.ExecutionControl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -53,7 +54,19 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+        TeamColor teamColor = piece.getTeamColor();
+        Collection<ChessMove> allValidMoves = new ArrayList<>();
+
+        for (ChessMove move : piece.pieceMoves(board, startPosition)) {
+            ChessBoard boardCopy = board.deepCopy();
+            boardCopy.addPiece(startPosition, null);
+            boardCopy.addPiece(move.getEndPosition(), new ChessPiece(teamColor, move.getPromotionPiece()));
+            if (!checkCheck(teamColor, boardCopy)) {
+                allValidMoves.add(move);
+            }
+        }
+        return allValidMoves;
     }
 
     /**
@@ -63,13 +76,17 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (board.getPiece(move.getStartPosition()) == null) {
+            throw new chess.InvalidMoveException("There is no piece there");
+        }
         if (board.getPiece(move.getStartPosition()).getTeamColor() != colorTurn) {
             throw new InvalidMoveException("Not player's turn");
         }
         if (validMoves(move.getStartPosition()).contains(move)) {
             ChessPiece piece = board.getPiece(move.getStartPosition());
             board.addPiece(move.getStartPosition(), null);
-            board.addPiece(move.getEndPosition(), piece);
+            ChessPiece.PieceType type = (move.getPromotionPiece() == null) ? piece.getPieceType() : move.getPromotionPiece();
+            board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), type));
             colorTurn = (colorTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         } else {
             throw new InvalidMoveException("Move not valid");
@@ -91,7 +108,13 @@ public class ChessGame {
         return null;
     }
 
-
+    /**
+     * Determines if the given team is in check on a given board
+     *
+     * @param teamColor which team to check for check
+     * @param myBoard the board to check for Check on
+     * @return True if the specified team is in check
+     */
     private boolean checkCheck(TeamColor teamColor, ChessBoard myBoard) {
         ChessPosition kingPosition = findKing(teamColor);
 
@@ -110,6 +133,8 @@ public class ChessGame {
         }
         return false;
     }
+
+
     /**
      * Determines if the given team is in check
      *
@@ -132,16 +157,7 @@ public class ChessGame {
             Collection<ChessMove> validKingMoves = new ArrayList<>();
             Collection<ChessMove> invalidKingMoves = new ArrayList<>();
 
-            for (ChessMove move : board.getPiece(kingPosition).pieceMoves(board, kingPosition)) {
-                ChessBoard boardCopy = board.deepCopy();
-                boardCopy.addPiece(kingPosition, null);
-                boardCopy.addPiece(move.getEndPosition(), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
-                if (!checkCheck(teamColor, boardCopy)) {
-                    validKingMoves.add(move);
-                } else {
-                    invalidKingMoves.add(move);
-                }
-            }
+
             return (validKingMoves.isEmpty());
         } else {
             return false;
@@ -179,5 +195,19 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return colorTurn == chessGame.colorTurn && Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(colorTurn, board);
     }
 }
