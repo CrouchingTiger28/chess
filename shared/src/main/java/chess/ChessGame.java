@@ -1,7 +1,5 @@
 package chess;
 
-import jdk.jshell.spi.ExecutionControl;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -158,12 +156,18 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         if (isInCheck(teamColor)) {
-            ChessPosition kingPosition = findKing(teamColor, board);
-            Collection<ChessMove> validKingMoves = new ArrayList<>();
-            Collection<ChessMove> invalidKingMoves = new ArrayList<>();
-
-
-            return (validKingMoves.isEmpty());
+            for (int x = 1; x <= 8; x++) {
+                for (int y =1; y <= 8; y++) {
+                    ChessPosition piecePosition = new ChessPosition(y, x);
+                    ChessPiece myPiece = board.getPiece(piecePosition);
+                    if (myPiece != null && myPiece.getTeamColor() == teamColor) {
+                        if (!validMoves(piecePosition).isEmpty()) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         } else {
             return false;
         }
