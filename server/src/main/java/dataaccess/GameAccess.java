@@ -15,8 +15,11 @@ public class GameAccess {
         games.add(data);
     }
 
-    public void updateGame(int gameID, String playercolor, String username) {
+    public void updateGame(int gameID, String playercolor, String username) throws DataAccessException{
         GameData game = getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("game does not exist");
+        }
         deleteGame(gameID);
 
         if (Objects.equals(playercolor, "white")) {
@@ -39,8 +42,8 @@ public class GameAccess {
         return games;
     }
 
-    public void deleteGame(int gameID) {
-        games.removeIf(currentGame -> currentGame.gameID() == gameID);
+    public Boolean deleteGame(int gameID) {
+        return games.removeIf(currentGame -> currentGame.gameID() == gameID);
     }
 
     public void deleteGames() {

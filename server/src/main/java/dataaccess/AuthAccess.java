@@ -23,8 +23,8 @@ public class AuthAccess {
         return null;
     }
 
-    public void deleteAuth(String authToken) {
-        auths.removeIf(currentAuth -> Objects.equals(currentAuth.authToken(), authToken));
+    public Boolean deleteAuth(String authToken) {
+        return auths.removeIf(currentAuth -> Objects.equals(currentAuth.authToken(), authToken));
     }
 
     public void deleteAuths() {
