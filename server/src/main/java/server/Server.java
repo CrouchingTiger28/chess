@@ -7,6 +7,7 @@ import io.javalin.*;
 import io.javalin.json.JavalinGson;
 import service.AlreadyTakenException;
 import service.InvalidLoginException;
+import service.NotAuthorizedException;
 
 public class Server {
 
@@ -62,10 +63,35 @@ public class Server {
                 token = authHeader;
             }
 
-            authService.logout(token);
+            try {
+                authService.logout(token);
 
-            ctx.status(200);
-            ctx.json(gson.toJson(""));
+                ctx.status(200);
+                ctx.json(gson.toJson(""));
+            }
+            catch (NotAuthorizedException e) {
+                ctx.status(401);
+                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+            }
+        });
+
+        javalin.get("/game", ctx -> {
+            String authHeader = ctx.header("Authorization");
+            String token;
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring("Bearer ".length());
+            } else {
+                token = authHeader;
+            }
+
+            try {
+                gameService.listGames(token);
+            }
+            catch (NotAuthorizedException e) {
+                ctx.status(401);
+                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+            }
+
 
         });
 

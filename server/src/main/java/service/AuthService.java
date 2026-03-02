@@ -11,6 +11,11 @@ public class AuthService {
     }
 
     public void logout(String authToken) {
-        auths.deleteAuth(authToken);
+        if (auths.getAuth(authToken) == null) {
+            throw(new NotAuthorizedException("Invalid AuthToken"));
+        }
+        else {
+            auths.deleteAuth(authToken);
+        }
     }
 }
