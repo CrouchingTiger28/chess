@@ -4,6 +4,7 @@ import Model.AuthData;
 import Model.UserData;
 import com.google.gson.Gson;
 import io.javalin.*;
+import io.javalin.json.JavalinGson;
 import service.AlreadyTakenException;
 
 public class Server {
@@ -11,11 +12,16 @@ public class Server {
     private final Javalin javalin;
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        Gson serializer = new Gson();
+        Gson gson = new Gson();
         service.AuthService authService = new service.AuthService();
         service.GameService gameService = new service.GameService();
         service.UserService userService = new service.UserService();
+
+        javalin = Javalin.create(config -> {
+            config.staticFiles.add("web");
+            config.jsonMapper(new JavalinGson());
+        });
+
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", context -> {
@@ -24,11 +30,11 @@ public class Server {
                 AuthData registerResult = userService.register(registerRequest);
 
                 context.status(200);
-                context.json(serializer.toJson(registerResult));
+                context.json(gson.toJson(registerResult));
             }
                 catch(AlreadyTakenException e){
                 context.status(403);
-                context.json(serializer.toJson("{ \"message\": \"Error: already taken\" }"));
+                context.json(gson.toJson("{ \"message\": \"Error: already taken\" }"));
             }
         });
 
