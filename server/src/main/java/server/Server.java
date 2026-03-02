@@ -57,13 +57,7 @@ public class Server {
         });
 
         javalin.delete("/session", ctx -> {
-            String authHeader = ctx.header("Authorization");
-            String token;
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring("Bearer ".length());
-            } else {
-                token = authHeader;
-            }
+            String token = extractAuth(ctx.header("Authorization"));
 
             try {
                 authService.logout(token);
@@ -78,13 +72,7 @@ public class Server {
         });
 
         javalin.get("/game", ctx -> {
-            String authHeader = ctx.header("Authorization");
-            String token;
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring("Bearer ".length());
-            } else {
-                token = authHeader;
-            }
+            String token = extractAuth(ctx.header("Authorization"));
 
             try {
                 Collection<GameData> games = gameService.listGames(token);
@@ -97,6 +85,11 @@ public class Server {
                 ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
             }
 
+
+        });
+
+        javalin.post("/game", ctx -> {
+            String token = extractAuth(ctx.header("Authorization"));
 
         });
 
@@ -117,5 +110,15 @@ public class Server {
 
     public void stop() {
         javalin.stop();
+    }
+
+    private String extractAuth(String header) {
+        String token;
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.substring("Bearer ".length());
+        } else {
+            token = header;
+        }
+        return token;
     }
 }
