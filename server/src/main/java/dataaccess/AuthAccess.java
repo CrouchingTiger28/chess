@@ -1,7 +1,5 @@
 package dataaccess;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -29,7 +27,7 @@ public class AuthAccess {
         return auths.removeIf(currentAuth -> Objects.equals(currentAuth.authToken(), authToken));
     }
 
-    public void deleteAuths() {
+    public void deleteAuthData() {
         auths = new ArrayList<>();
     }
 }

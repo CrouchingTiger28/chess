@@ -1,8 +1,12 @@
 package service;
 
 public class AuthService {
-    dataaccess.AuthAccess users = new dataaccess.AuthAccess();
+    dataaccess.AuthAccess auths = new dataaccess.AuthAccess();
     public AuthService() {
 
+    }
+
+    public void deleteAuths() {
+        auths.deleteAuthData();
     }
 }

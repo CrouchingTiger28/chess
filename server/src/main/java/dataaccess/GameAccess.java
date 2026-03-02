@@ -46,7 +46,7 @@ public class GameAccess {
         return games.removeIf(currentGame -> currentGame.gameID() == gameID);
     }
 
-    public void deleteGames() {
+    public void deleteGameData() {
         games = new ArrayList<>();
     }
 }

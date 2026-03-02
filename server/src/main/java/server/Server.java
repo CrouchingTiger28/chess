@@ -38,6 +38,15 @@ public class Server {
             }
         });
 
+        javalin.delete("/db", ctx -> {
+            userService.deleteUsers();
+            gameService.deleteGames();
+            authService.deleteAuths();
+
+            ctx.status(200);
+            ctx.json(gson.toJson(""));
+        });
+
     }
 
     public int run(int desiredPort) {
