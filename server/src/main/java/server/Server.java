@@ -39,7 +39,7 @@ public class Server {
             }
             catch(AlreadyTakenException e){
                 context.status(403);
-                context.json(gson.toJson("{ \"message\": \"Error: already taken\" }"));
+                context.result("{ \"message\": \"Error: already taken\" }");
             }
         });
 
@@ -53,7 +53,7 @@ public class Server {
             }
             catch(InvalidLoginException e) {
                 ctx.status(401);
-                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+                ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
         });
 
@@ -64,11 +64,11 @@ public class Server {
                 authService.logout(token);
 
                 ctx.status(200);
-                ctx.json(gson.toJson(""));
+                ctx.result("");
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
-                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+                ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
         });
 
@@ -83,7 +83,7 @@ public class Server {
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
-                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+                ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
 
         });
@@ -96,11 +96,11 @@ public class Server {
                 int newGameResult = gameService.createGame(newGameRequest, token);
 
                 ctx.status(200);
-                ctx.json(gson.toJson("{\"gameID\": " + newGameResult + " }"));
+                ctx.json(gson.toJson(new Model.GameIDValue(newGameResult)));
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
-                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+                ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
         });
 
@@ -112,19 +112,19 @@ public class Server {
                 gameService.joinGame(joinGameRequest, token);
 
                 ctx.status(200);
-                ctx.json(gson.toJson("{}"));
+                ctx.result("{}");
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
-                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+                ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
             catch (AlreadyTakenException e) {
                 ctx.status(403);
-                ctx.json(gson.toJson("{ \"message\": \"Error: already taken\" }"));
+                ctx.result("{ \"message\": \"Error: already taken\" }");
             }
             catch (DataAccessException e) {
                 ctx.status(400);
-                ctx.json(gson.toJson("{ \"message\": \"Error: bad request\" }"));
+                ctx.result("{ \"message\": \"Error: bad request\" }");
             }
         });
 
@@ -134,7 +134,7 @@ public class Server {
             authService.deleteAuths();
 
             ctx.status(200);
-            ctx.json(gson.toJson(""));
+            ctx.result("{}");
         });
     }
 
