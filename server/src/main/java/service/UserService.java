@@ -1,22 +1,26 @@
 package service;
 
+import Model.AuthData;
 import Model.UserData;
-
+import java.util.UUID;
 import java.util.Objects;
 
 public class UserService {
     dataaccess.UserAccess users = new dataaccess.UserAccess();
+    dataaccess.AuthAccess auths = new dataaccess.AuthAccess();
     public UserService() {
 
     }
 
-    public UserData register(UserData registerRequest) throws AlreadyTakenException {
+    public AuthData register(UserData registerRequest) throws AlreadyTakenException {
         UserData user = users.getUser(registerRequest.username());
         if (user != null) {
             throw new AlreadyTakenException("User already exists");
         } else {
             users.createUser(registerRequest);
-            return registerRequest;
+            AuthData newToken = new AuthData(UUID.randomUUID().toString(), registerRequest.username());
+            auths.createAuth(newToken);
+            return newToken;
         }
     }
 
