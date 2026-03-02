@@ -1,6 +1,7 @@
 package server;
 
 import Model.AuthData;
+import Model.JoinRequest;
 import Model.UserData;
 import Model.GameData;
 import com.google.gson.Gson;
@@ -91,7 +92,6 @@ public class Server {
             String token = extractAuth(ctx.header("Authorization"));
 
             try {
-
                 GameData newGameRequest = ctx.bodyAsClass(GameData.class);
                 int newGameResult = gameService.createGame(newGameRequest, token);
 
@@ -101,6 +101,26 @@ public class Server {
             catch (NotAuthorizedException e) {
                 ctx.status(401);
                 ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+            }
+        });
+
+        javalin.put("/game", ctx -> {
+            String token = extractAuth(ctx.header("Authorization"));
+
+            try {
+                Model.JoinRequest joinGameRequest = ctx.bodyAsClass(Model.JoinRequest.class);
+                gameService.joinGame(joinGameRequest, token);
+
+                ctx.status(200);
+                ctx.json(gson.toJson("{}"));
+            }
+            catch (NotAuthorizedException e) {
+                ctx.status(401);
+                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+            }
+            catch (AlreadyTakenException e) {
+                ctx.status(403);
+                ctx.json(gson.toJson("{ \"message\": \"Error: already taken\" }"));
             }
         });
 

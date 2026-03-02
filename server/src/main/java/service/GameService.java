@@ -17,20 +17,26 @@ public class GameService {
     }
 
     public ArrayList<GameData> listGames(String authToken) {
-        if (auths.getAuth(authToken) == null) {
-            throw(new NotAuthorizedException("Invalid AuthToken"));
-        } else {
-            return games.listGames();
-        }
+        checkAuth(authToken);
+
+        return games.listGames();
     }
 
     public int createGame(GameData newGame, String authToken) throws NotAuthorizedException{
+        checkAuth(authToken);
+
+        int id = games.getCurrentID();
+        games.createGame(new GameData(id, null, null, newGame.gameName(), new ChessGame()));
+        return id;
+    }
+
+    public void joinGame(Model.JoinRequest request, String authToken) {
+        checkAuth(authToken);
+    }
+
+    private void checkAuth(String authToken) {
         if (auths.getAuth(authToken) == null) {
             throw(new NotAuthorizedException("Invalid AuthToken"));
-        } else {
-            int id = games.getCurrentID();
-            games.createGame(new GameData(id, null, null, newGame.gameName(), new ChessGame()));
-            return id;
         }
     }
 }
