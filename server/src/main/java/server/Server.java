@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.json.JavalinGson;
 import service.AlreadyTakenException;
+import service.InvalidLoginException;
 
 public class Server {
 
@@ -32,9 +33,23 @@ public class Server {
                 context.status(200);
                 context.json(gson.toJson(registerResult));
             }
-                catch(AlreadyTakenException e){
+            catch(AlreadyTakenException e){
                 context.status(403);
                 context.json(gson.toJson("{ \"message\": \"Error: already taken\" }"));
+            }
+        });
+
+        javalin.post("/session", ctx -> {
+            try {
+                UserData loginRequest = ctx.bodyAsClass(UserData.class);
+                AuthData loginResult = userService.login(loginRequest);
+
+                ctx.status(200);
+                ctx.json(gson.toJson(loginResult));
+            }
+            catch(InvalidLoginException e) {
+                ctx.status(401);
+                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
             }
         });
 
@@ -46,7 +61,6 @@ public class Server {
             ctx.status(200);
             ctx.json(gson.toJson(""));
         });
-
     }
 
     public int run(int desiredPort) {

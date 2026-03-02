@@ -24,12 +24,14 @@ public class UserService {
         }
     }
 
-    public UserData login(UserData loginRequest) {
+    public AuthData login(UserData loginRequest) {
         UserData user = users.getUser(loginRequest.username());
         if (user == null || !Objects.equals(user.password(), loginRequest.password())) {
             throw new InvalidLoginException("Incorrect Username or Password");
         } else {
-            return user;
+            AuthData newToken = new AuthData(UUID.randomUUID().toString(), loginRequest.username());
+            auths.createAuth(newToken);
+            return newToken;
         }
     }
 
