@@ -1,10 +1,10 @@
 package server;
 
 import Model.AuthData;
-import Model.JoinRequest;
 import Model.UserData;
 import Model.GameData;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.json.JavalinGson;
 import service.AlreadyTakenException;
@@ -121,6 +121,10 @@ public class Server {
             catch (AlreadyTakenException e) {
                 ctx.status(403);
                 ctx.json(gson.toJson("{ \"message\": \"Error: already taken\" }"));
+            }
+            catch (DataAccessException e) {
+                ctx.status(400);
+                ctx.json(gson.toJson("{ \"message\": \"Error: bad request\" }"));
             }
         });
 

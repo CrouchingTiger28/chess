@@ -2,8 +2,11 @@ package service;
 
 import Model.GameData;
 import chess.ChessGame;
+import dataaccess.DataAccessException;
+import io.javalin.http.BadRequestResponse;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class GameService {
     dataaccess.GameAccess games = new dataaccess.GameAccess();
@@ -30,8 +33,27 @@ public class GameService {
         return id;
     }
 
-    public void joinGame(Model.JoinRequest request, String authToken) {
+    public void joinGame(Model.JoinRequest request, String authToken) throws AlreadyTakenException, DataAccessException {
         checkAuth(authToken);
+
+        GameData game = games.getGame(request.gameID());
+        if (game == null) {
+            throw new BadRequestResponse("Game does not exist");
+        } else {
+            if (Objects.equals(request.playerColor(), "white")) {
+                if (game.whiteUsername() != null) {
+                    games.updateGame(request.gameID(), "white", auths.getAuth(authToken).username());
+                } else {
+                    throw new AlreadyTakenException("White user already filled");
+                }
+            } else {
+                if (game.whiteUsername() != null) {
+                    games.updateGame(request.gameID(), "black", auths.getAuth(authToken).username());
+                } else {
+                    throw new AlreadyTakenException("Black user already filled");
+                }
+            }
+        }
     }
 
     private void checkAuth(String authToken) {
