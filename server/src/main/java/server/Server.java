@@ -53,6 +53,22 @@ public class Server {
             }
         });
 
+        javalin.delete("/session", ctx -> {
+            String authHeader = ctx.header("Authorization");
+            String token;
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring("Bearer ".length());
+            } else {
+                token = authHeader;
+            }
+
+            authService.logout(token);
+
+            ctx.status(200);
+            ctx.json(gson.toJson(""));
+
+        });
+
         javalin.delete("/db", ctx -> {
             userService.deleteUsers();
             gameService.deleteGames();

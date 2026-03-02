@@ -9,4 +9,8 @@ public class AuthService {
     public void deleteAuths() {
         auths.deleteAuthData();
     }
+
+    public void logout(String authToken) {
+        auths.deleteAuth(authToken);
+    }
 }
