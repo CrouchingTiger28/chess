@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class GameAccess {
 
-    private ArrayList<GameData> games = new ArrayList<>();
+    private static ArrayList<GameData> games = new ArrayList<>();
     public GameAccess() {
 
     }

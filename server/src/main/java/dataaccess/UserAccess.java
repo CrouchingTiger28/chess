@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class UserAccess {
 
-    private ArrayList<Model.UserData> users = new ArrayList<>();
+    private static ArrayList<Model.UserData> users = new ArrayList<>();
     public UserAccess() {
 
     }

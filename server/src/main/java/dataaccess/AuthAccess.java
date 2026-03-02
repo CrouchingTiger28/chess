@@ -1,11 +1,13 @@
 package dataaccess;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class AuthAccess {
 
-    private ArrayList<Model.AuthData> auths = new ArrayList<>();
+    private static ArrayList<Model.AuthData> auths = new ArrayList<>();
     public AuthAccess() {
 
     }

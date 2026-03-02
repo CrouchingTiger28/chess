@@ -1,6 +1,5 @@
 package service;
 
-import Model.AuthData;
 import Model.UserData;
 
 import java.util.Objects;
