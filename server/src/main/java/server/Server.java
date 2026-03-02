@@ -85,12 +85,23 @@ public class Server {
                 ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
             }
 
-
         });
 
         javalin.post("/game", ctx -> {
             String token = extractAuth(ctx.header("Authorization"));
 
+            try {
+
+                GameData newGameRequest = ctx.bodyAsClass(GameData.class);
+                int newGameResult = gameService.createGame(newGameRequest, token);
+
+                ctx.status(200);
+                ctx.json(gson.toJson("{\"gameID\": " + newGameResult + " }"));
+            }
+            catch (NotAuthorizedException e) {
+                ctx.status(401);
+                ctx.json(gson.toJson("{ \"message\": \"Error: unauthorized\" }"));
+            }
         });
 
         javalin.delete("/db", ctx -> {

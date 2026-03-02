@@ -1,6 +1,8 @@
 package service;
 
 import Model.GameData;
+import chess.ChessGame;
+
 import java.util.ArrayList;
 
 public class GameService {
@@ -19,6 +21,16 @@ public class GameService {
             throw(new NotAuthorizedException("Invalid AuthToken"));
         } else {
             return games.listGames();
+        }
+    }
+
+    public int createGame(GameData newGame, String authToken) throws NotAuthorizedException{
+        if (auths.getAuth(authToken) == null) {
+            throw(new NotAuthorizedException("Invalid AuthToken"));
+        } else {
+            int id = games.getCurrentID();
+            games.createGame(new GameData(id, null, null, newGame.gameName(), new ChessGame()));
+            return id;
         }
     }
 }

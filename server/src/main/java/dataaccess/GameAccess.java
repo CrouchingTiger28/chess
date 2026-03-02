@@ -7,12 +7,18 @@ import java.util.Objects;
 public class GameAccess {
 
     private static ArrayList<GameData> games = new ArrayList<>();
+    private static int currentID = 0;
     public GameAccess() {
 
     }
 
-    public void createGame(GameData data) {
-        games.add(data);
+    public void createGame(GameData game) {
+        currentID ++;
+        games.add(game);
+    }
+
+    public int getCurrentID() {
+        return currentID;
     }
 
     public void updateGame(int gameID, String playercolor, String username) throws DataAccessException{
@@ -42,11 +48,12 @@ public class GameAccess {
         return games;
     }
 
-    public Boolean deleteGame(int gameID) {
-        return games.removeIf(currentGame -> currentGame.gameID() == gameID);
+    public void deleteGame(int gameID) {
+        games.removeIf(currentGame -> currentGame.gameID() == gameID);
     }
 
     public void deleteGameData() {
+        currentID = 0;
         games = new ArrayList<>();
     }
 }
