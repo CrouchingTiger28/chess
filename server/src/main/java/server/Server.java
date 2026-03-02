@@ -2,12 +2,14 @@ package server;
 
 import Model.AuthData;
 import Model.UserData;
+import Model.GameData;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.json.JavalinGson;
 import service.AlreadyTakenException;
 import service.InvalidLoginException;
 import service.NotAuthorizedException;
+import java.util.Collection;
 
 public class Server {
 
@@ -85,7 +87,10 @@ public class Server {
             }
 
             try {
-                gameService.listGames(token);
+                Collection<GameData> games = gameService.listGames(token);
+
+                ctx.status(200);
+                ctx.json(gson.toJson(games));
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
