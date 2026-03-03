@@ -156,21 +156,25 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         if (isInCheck(teamColor)) {
-            for (int x = 1; x <= 8; x++) {
-                for (int y =1; y <= 8; y++) {
-                    ChessPosition piecePosition = new ChessPosition(y, x);
-                    ChessPiece myPiece = board.getPiece(piecePosition);
-                    if (myPiece != null && myPiece.getTeamColor() == teamColor) {
-                        if (!validMoves(piecePosition).isEmpty()) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
+            return !noPieceCanMove(teamColor);
         } else {
             return false;
         }
+    }
+
+    private boolean noPieceCanMove(TeamColor teamColor) {
+        for (int x = 1; x <= 8; x++) {
+            for (int y =1; y <= 8; y++) {
+                ChessPosition piecePosition = new ChessPosition(y, x);
+                ChessPiece myPiece = board.getPiece(piecePosition);
+                if (myPiece != null && myPiece.getTeamColor() == teamColor) {
+                    if (!validMoves(piecePosition).isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -182,18 +186,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         if (!isInCheck(teamColor)) {
-            for (int x = 1; x <= 8; x++) {
-                for (int y =1; y <= 8; y++) {
-                    ChessPosition piecePosition = new ChessPosition(y, x);
-                    ChessPiece myPiece = board.getPiece(piecePosition);
-                    if (myPiece != null && myPiece.getTeamColor() == teamColor) {
-                        if (!validMoves(piecePosition).isEmpty()) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
+            return noPieceCanMove(teamColor);
         } else {
             return false;
         }
