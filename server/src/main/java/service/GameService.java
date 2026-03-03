@@ -5,8 +5,6 @@ import chess.ChessGame;
 import dataaccess.DataAccessException;
 import io.javalin.http.BadRequestResponse;
 
-import java.util.ArrayList;
-
 public class GameService {
     dataaccess.GameAccess games = new dataaccess.GameAccess();
     dataaccess.AuthAccess auths = new dataaccess.AuthAccess();
@@ -18,10 +16,10 @@ public class GameService {
         games.deleteGameData();
     }
 
-    public ArrayList<GameData> listGames(String authToken) {
+    public Model.GameList listGames(String authToken) {
         checkAuth(authToken);
 
-        return games.listGames();
+        return new Model.GameList(games.listGames());
     }
 
     public int createGame(GameData newGame, String authToken) throws NotAuthorizedException{

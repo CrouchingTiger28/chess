@@ -85,9 +85,21 @@ public class Server {
             String token = extractAuth(ctx.header("Authorization"));
 
             try {
-                java.util.ArrayList<GameData> games = gameService.listGames(token);
+                Model.GameList games = gameService.listGames(token);
 
                 ctx.status(200);
+//                ctx.result("{ \"message\": \"Error: unauthorized\" }");
+//                ctx.json("{\n" +
+//                        "  \"games\": [\n" +
+//                        "    {\n" +
+//                        "      \"gameID\": 1234,\n" +
+//                        "      \"whiteUsername\": \"\",\n" +
+//                        "      \"blackUsername\": \"\",\n" +
+//                        "      \"gameName\": \"\",\n" +
+//                        "      \"game\": \"\"\n" +
+//                        "    }\n" +
+//                        "  ]\n" +
+//                        "}");
                 ctx.json(games);
             }
             catch (NotAuthorizedException e) {
