@@ -6,7 +6,6 @@ import dataaccess.DataAccessException;
 import io.javalin.http.BadRequestResponse;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class GameService {
     dataaccess.GameAccess games = new dataaccess.GameAccess();
@@ -26,6 +25,9 @@ public class GameService {
     }
 
     public int createGame(GameData newGame, String authToken) throws NotAuthorizedException{
+        if (newGame.gameName() == null) {
+            throw new BadRequestResponse("No game name given");
+        }
         checkAuth(authToken);
 
         int id = games.getCurrentID();
@@ -40,18 +42,20 @@ public class GameService {
         if (game == null) {
             throw new BadRequestResponse("Game does not exist");
         } else {
-            if (Objects.equals(request.playerColor(), "white")) {
-                if (game.whiteUsername() != null) {
+            if (request.playerColor() == ChessGame.TeamColor.WHITE) {
+                if (game.whiteUsername() == null) {
                     games.updateGame(request.gameID(), "white", auths.getAuth(authToken).username());
                 } else {
                     throw new AlreadyTakenException("White user already filled");
                 }
-            } else {
-                if (game.whiteUsername() != null) {
+            } else if (request.playerColor() == ChessGame.TeamColor.BLACK) {
+                if (game.blackUsername() == null) {
                     games.updateGame(request.gameID(), "black", auths.getAuth(authToken).username());
                 } else {
                     throw new AlreadyTakenException("Black user already filled");
                 }
+            } else {
+                throw new BadRequestResponse("Invalid player color");
             }
         }
     }

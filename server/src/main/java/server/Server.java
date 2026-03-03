@@ -6,11 +6,11 @@ import Model.GameData;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.*;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.json.JavalinGson;
 import service.AlreadyTakenException;
 import service.InvalidLoginException;
 import service.NotAuthorizedException;
-import java.util.Collection;
 
 public class Server {
 
@@ -35,11 +35,15 @@ public class Server {
                 AuthData registerResult = userService.register(registerRequest);
 
                 context.status(200);
-                context.json(gson.toJson(registerResult));
+                context.json(registerResult);
             }
             catch(AlreadyTakenException e){
                 context.status(403);
                 context.result("{ \"message\": \"Error: already taken\" }");
+            }
+            catch(BadRequestResponse e) {
+                context.status(400);
+                context.result("{ \"message\": \"Error: bad request\" }");
             }
         });
 
@@ -51,10 +55,15 @@ public class Server {
                 ctx.status(200);
                 ctx.json(gson.toJson(loginResult));
             }
+            catch(BadRequestResponse e) {
+                ctx.status(400);
+                ctx.result("{ \"message\": \"Error: bad request\" }");
+            }
             catch(InvalidLoginException e) {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
+
         });
 
         javalin.delete("/session", ctx -> {
@@ -76,10 +85,10 @@ public class Server {
             String token = extractAuth(ctx.header("Authorization"));
 
             try {
-                Collection<GameData> games = gameService.listGames(token);
+                java.util.ArrayList<GameData> games = gameService.listGames(token);
 
                 ctx.status(200);
-                ctx.json(gson.toJson(games));
+                ctx.json(games);
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
@@ -102,6 +111,10 @@ public class Server {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
+            catch (BadRequestResponse e) {
+                ctx.status(400);
+                ctx.result("{ \"message\": \"Error: bad request\" }");
+            }
         });
 
         javalin.put("/game", ctx -> {
@@ -112,7 +125,7 @@ public class Server {
                 gameService.joinGame(joinGameRequest, token);
 
                 ctx.status(200);
-                ctx.result("{}");
+                ctx.result("");
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
@@ -122,7 +135,7 @@ public class Server {
                 ctx.status(403);
                 ctx.result("{ \"message\": \"Error: already taken\" }");
             }
-            catch (DataAccessException e) {
+            catch (DataAccessException | BadRequestResponse e) {
                 ctx.status(400);
                 ctx.result("{ \"message\": \"Error: bad request\" }");
             }
@@ -134,7 +147,7 @@ public class Server {
             authService.deleteAuths();
 
             ctx.status(200);
-            ctx.result("{}");
+            ctx.json(java.util.Map.of());
         });
     }
 

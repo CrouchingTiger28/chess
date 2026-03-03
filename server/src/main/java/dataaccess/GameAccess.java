@@ -7,7 +7,7 @@ import java.util.Objects;
 public class GameAccess {
 
     private static ArrayList<GameData> games = new ArrayList<>();
-    private static int currentID = 0;
+    private static int currentID = 1;
     public GameAccess() {
 
     }
@@ -53,7 +53,7 @@ public class GameAccess {
     }
 
     public void deleteGameData() {
-        currentID = 0;
+        currentID = 1;
         games = new ArrayList<>();
     }
 }

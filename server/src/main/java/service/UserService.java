@@ -2,6 +2,8 @@ package service;
 
 import Model.AuthData;
 import Model.UserData;
+import io.javalin.http.BadRequestResponse;
+
 import java.util.UUID;
 import java.util.Objects;
 
@@ -12,7 +14,10 @@ public class UserService {
 
     }
 
-    public AuthData register(UserData registerRequest) throws AlreadyTakenException {
+    public AuthData register(UserData registerRequest) throws AlreadyTakenException, BadRequestResponse {
+        if (registerRequest.username() == null || registerRequest.password() == null) {
+            throw new BadRequestResponse("Username or Password not supplied");
+        }
         UserData user = users.getUser(registerRequest.username());
         if (user != null) {
             throw new AlreadyTakenException("User already exists");
@@ -25,6 +30,9 @@ public class UserService {
     }
 
     public AuthData login(UserData loginRequest) {
+        if (loginRequest.password() == null || loginRequest.username() == null) {
+            throw new BadRequestResponse("Username or password fields blank");
+        }
         UserData user = users.getUser(loginRequest.username());
         if (user == null || !Objects.equals(user.password(), loginRequest.password())) {
             throw new InvalidLoginException("Incorrect Username or Password");
