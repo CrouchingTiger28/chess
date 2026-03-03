@@ -156,7 +156,7 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         if (isInCheck(teamColor)) {
-            return !noPieceCanMove(teamColor);
+            return noPieceCanMove(teamColor);
         } else {
             return false;
         }
