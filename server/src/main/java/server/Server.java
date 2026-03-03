@@ -1,8 +1,8 @@
 package server;
 
-import Model.AuthData;
-import Model.UserData;
-import Model.GameData;
+import model.AuthData;
+import model.UserData;
+import model.GameData;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.*;
@@ -85,7 +85,7 @@ public class Server {
             String token = extractAuth(ctx.header("Authorization"));
 
             try {
-                Model.GameList games = gameService.listGames(token);
+                model.GameList games = gameService.listGames(token);
 
                 ctx.status(200);
                 ctx.json(games);
@@ -105,7 +105,7 @@ public class Server {
                 int newGameResult = gameService.createGame(newGameRequest, token);
 
                 ctx.status(200);
-                ctx.json(gson.toJson(new Model.GameIDValue(newGameResult)));
+                ctx.json(gson.toJson(new model.GameIDValue(newGameResult)));
             }
             catch (NotAuthorizedException e) {
                 ctx.status(401);
@@ -121,7 +121,7 @@ public class Server {
             String token = extractAuth(ctx.header("Authorization"));
 
             try {
-                Model.JoinRequest joinGameRequest = ctx.bodyAsClass(Model.JoinRequest.class);
+                model.JoinRequest joinGameRequest = ctx.bodyAsClass(model.JoinRequest.class);
                 gameService.joinGame(joinGameRequest, token);
 
                 ctx.status(200);

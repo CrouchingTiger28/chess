@@ -1,7 +1,7 @@
 package service;
 
-import Model.AuthData;
-import Model.UserData;
+import model.AuthData;
+import model.UserData;
 import io.javalin.http.BadRequestResponse;
 
 import java.util.UUID;

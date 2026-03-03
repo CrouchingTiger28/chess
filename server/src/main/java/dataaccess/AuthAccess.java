@@ -5,17 +5,17 @@ import java.util.Objects;
 
 public class AuthAccess {
 
-    private static ArrayList<Model.AuthData> auths = new ArrayList<>();
+    private static ArrayList<model.AuthData> auths = new ArrayList<>();
     public AuthAccess() {
 
     }
 
-    public void createAuth(Model.AuthData data) {
+    public void createAuth(model.AuthData data) {
         auths.add(data);
     }
 
-    public Model.AuthData getAuth(String authToken) {
-        for (Model.AuthData currentAuth : auths) {
+    public model.AuthData getAuth(String authToken) {
+        for (model.AuthData currentAuth : auths) {
             if (Objects.equals(currentAuth.authToken(), authToken)) {
                 return currentAuth;
             }

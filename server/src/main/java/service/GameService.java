@@ -1,6 +1,6 @@
 package service;
 
-import Model.GameData;
+import model.GameData;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import io.javalin.http.BadRequestResponse;
@@ -16,10 +16,10 @@ public class GameService {
         games.deleteGameData();
     }
 
-    public Model.GameList listGames(String authToken) {
+    public model.GameList listGames(String authToken) {
         checkAuth(authToken);
 
-        return new Model.GameList(games.listGames());
+        return new model.GameList(games.listGames());
     }
 
     public int createGame(GameData newGame, String authToken) throws NotAuthorizedException{
@@ -33,7 +33,7 @@ public class GameService {
         return id;
     }
 
-    public void joinGame(Model.JoinRequest request, String authToken) throws AlreadyTakenException, DataAccessException {
+    public void joinGame(model.JoinRequest request, String authToken) throws AlreadyTakenException, DataAccessException {
         checkAuth(authToken);
 
         GameData game = games.getGame(request.gameID());

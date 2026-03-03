@@ -5,13 +5,13 @@ import java.util.Objects;
 
 public class UserAccess {
 
-    private static ArrayList<Model.UserData> users = new ArrayList<>();
+    private static ArrayList<model.UserData> users = new ArrayList<>();
     public UserAccess() {
 
     }
 
-    public Model.UserData getUser(String username) {
-        for (Model.UserData currentUser : users) {
+    public model.UserData getUser(String username) {
+        for (model.UserData currentUser : users) {
             if (Objects.equals(currentUser.username(), username)) {
                 return currentUser;
             }
@@ -19,7 +19,7 @@ public class UserAccess {
         return null;
     }
 
-    public void createUser(Model.UserData data) {
+    public void createUser(model.UserData data) {
         users.add(data);
     }
 
