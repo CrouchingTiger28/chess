@@ -1,8 +1,9 @@
-package java.passoff.server;
+package test.java.passoff.server;
 
 import chess.ChessGame;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
+import passoff.server.TestServerFacade;
 import server.Server;
 
 import java.lang.reflect.Method;
