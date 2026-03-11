@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.DatabaseManager;
 import model.AuthData;
 import model.UserData;
 import model.GameData;
@@ -12,15 +13,25 @@ import service.AlreadyTakenException;
 import service.InvalidLoginException;
 import service.NotAuthorizedException;
 
+import javax.xml.crypto.Data;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 public class Server {
 
     private final Javalin javalin;
 
     public Server() {
         Gson gson = new Gson();
+        try {
+            configureDatabase();
+        } catch (DataAccessException ex) {
+            System.out.println("No");
+        }
         service.AuthService authService = new service.AuthService();
         service.GameService gameService = new service.GameService();
         service.UserService userService = new service.UserService();
+
 
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
@@ -75,7 +86,7 @@ public class Server {
                 ctx.status(200);
                 ctx.result("");
             }
-            catch (NotAuthorizedException e) {
+            catch (NotAuthorizedException | DataAccessException e) {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
@@ -168,5 +179,44 @@ public class Server {
             token = header;
         }
         return token;
+    }
+
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  users (
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256),
+              PRIMARY KEY (`username`),
+              INDEX(username)
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  auths (
+            `authToken` varchar(256) NOT NULL,
+            `username` varchar(256) NOT NULL,
+            PRIMARY KEY (`authToken`),
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  games (
+              `gameID` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
+              'gameName' varchar(256),
+              'game' chess.ChessGame,
+              PRIMARY KEY (`gameID`)
+            """
+    };
+
+    private void configureDatabase() throws DataAccessException{
+        DatabaseManager.createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Unable to configure database");
+        }
     }
 }

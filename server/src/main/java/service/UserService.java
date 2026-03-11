@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 import io.javalin.http.BadRequestResponse;
@@ -14,7 +15,7 @@ public class UserService {
 
     }
 
-    public AuthData register(UserData registerRequest) throws AlreadyTakenException, BadRequestResponse {
+    public AuthData register(UserData registerRequest) throws AlreadyTakenException, BadRequestResponse, DataAccessException {
         if (registerRequest.username() == null || registerRequest.password() == null) {
             throw new BadRequestResponse("Username or Password not supplied");
         }
@@ -29,7 +30,7 @@ public class UserService {
         }
     }
 
-    public AuthData login(UserData loginRequest) {
+    public AuthData login(UserData loginRequest) throws DataAccessException{
         if (loginRequest.password() == null || loginRequest.username() == null) {
             throw new BadRequestResponse("Username or password fields blank");
         }

@@ -16,13 +16,13 @@ public class GameService {
         games.deleteGameData();
     }
 
-    public model.GameList listGames(String authToken) {
+    public model.GameList listGames(String authToken) throws DataAccessException{
         checkAuth(authToken);
 
         return new model.GameList(games.listGames());
     }
 
-    public int createGame(GameData newGame, String authToken) throws NotAuthorizedException{
+    public int createGame(GameData newGame, String authToken) throws NotAuthorizedException, DataAccessException{
         if (newGame.gameName() == null) {
             throw new BadRequestResponse("No game name given");
         }
@@ -58,7 +58,7 @@ public class GameService {
         }
     }
 
-    private void checkAuth(String authToken) {
+    private void checkAuth(String authToken) throws DataAccessException, NotAuthorizedException{
         if (auths.getAuth(authToken) == null) {
             throw(new NotAuthorizedException("Invalid AuthToken"));
         }
