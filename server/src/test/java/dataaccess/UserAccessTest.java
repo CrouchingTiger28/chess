@@ -71,7 +71,7 @@ public class UserAccessTest {
 
     @Test
     @Order(5)
-    public void succeedDeleteTest() throws DataAccessException, SQLException {
+    public void succeedClearTest() throws DataAccessException, SQLException {
         userAccess.createUser(TEST_USER);
         UserData user = new UserData("NewUsername", "NewPassword", "New@Email");
         userAccess.createUser(user);
