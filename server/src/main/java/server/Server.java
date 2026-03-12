@@ -55,7 +55,7 @@ public class Server {
                 context.status(400);
                 context.result("{ \"message\": \"Error: bad request\" }");
             }
-            catch (SQLException e) {
+            catch (SQLException | DataAccessException e) {
                 context.status(500);
                 context.result("{ \"message\": \"Error: server error\" }");
             }
@@ -77,7 +77,7 @@ public class Server {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
-            catch (SQLException e) {
+            catch (SQLException | DataAccessException e) {
                 ctx.status(500);
                 ctx.result("{ \"message\": \"Error: server error\" }");
             }
@@ -187,11 +187,7 @@ public class Server {
                 ctx.status(200);
                 ctx.json(java.util.Map.of());
             }
-            catch (DataAccessException e) {
-                ctx.status(400);
-                ctx.result("{ \"message\": \"Error: bad request\" }");
-            }
-            catch (SQLException e) {
+            catch (SQLException | DataAccessException e) {
                 ctx.status(500);
                 ctx.result("{ \"message\": \"Error: server error\" }");
             }
