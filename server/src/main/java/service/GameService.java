@@ -5,6 +5,8 @@ import chess.ChessGame;
 import dataaccess.DataAccessException;
 import io.javalin.http.BadRequestResponse;
 
+import java.sql.SQLException;
+
 public class GameService {
     dataaccess.GameAccess games = new dataaccess.GameAccess();
     dataaccess.AuthAccess auths = new dataaccess.AuthAccess();
@@ -12,17 +14,17 @@ public class GameService {
 
     }
 
-    public void deleteGames() throws DataAccessException{
+    public void deleteGames() throws DataAccessException, SQLException{
         games.deleteGameData();
     }
 
-    public model.GameList listGames(String authToken) throws DataAccessException{
+    public model.GameList listGames(String authToken) throws DataAccessException, SQLException{
         checkAuth(authToken);
 
         return new model.GameList(games.listGames());
     }
 
-    public int createGame(GameData newGame, String authToken) throws NotAuthorizedException, DataAccessException{
+    public int createGame(GameData newGame, String authToken) throws NotAuthorizedException, DataAccessException, SQLException {
         if (newGame.gameName() == null) {
             throw new BadRequestResponse("No game name given");
         }
@@ -31,7 +33,7 @@ public class GameService {
         return games.createGame(new GameData(0, null, null, newGame.gameName(), new ChessGame()));
     }
 
-    public void joinGame(model.JoinRequest request, String authToken) throws AlreadyTakenException, DataAccessException {
+    public void joinGame(model.JoinRequest request, String authToken) throws AlreadyTakenException, DataAccessException, SQLException{
         checkAuth(authToken);
 
         GameData game = games.getGame(request.gameID());
@@ -56,7 +58,7 @@ public class GameService {
         }
     }
 
-    private void checkAuth(String authToken) throws DataAccessException, NotAuthorizedException{
+    private void checkAuth(String authToken) throws DataAccessException, NotAuthorizedException, SQLException{
         if (auths.getAuth(authToken) == null) {
             throw(new NotAuthorizedException("Invalid AuthToken"));
         }

@@ -9,7 +9,7 @@ public class UserAccess {
     public UserAccess() {
     }
 
-    public model.UserData getUser(String username) throws DataAccessException{
+    public model.UserData getUser(String username) throws DataAccessException, SQLException{
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, password, email FROM users WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -20,18 +20,16 @@ public class UserAccess {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new DataAccessException("Unable to read data.");
         }
         return null;
     }
 
-    public void createUser(model.UserData data) throws DataAccessException{
+    public void createUser(model.UserData data) throws DataAccessException, SQLException{
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         ExecuteUpdate.execute(statement, data.username(), data.password(), data.email());
     }
 
-    public void deleteUserData() throws DataAccessException{
+    public void deleteUserData() throws DataAccessException, SQLException{
         var statement = "TRUNCATE users";
         ExecuteUpdate.execute(statement);
     }

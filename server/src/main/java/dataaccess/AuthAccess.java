@@ -9,12 +9,12 @@ public class AuthAccess {
     public AuthAccess() {
     }
 
-    public void createAuth(model.AuthData data) throws DataAccessException{
+    public void createAuth(model.AuthData data) throws DataAccessException, SQLException{
         var statement = "INSERT INTO auths (authToken, username) VALUES (?, ?)";
         ExecuteUpdate.execute(statement, data.authToken(), data.username());
     }
 
-    public model.AuthData getAuth(String authToken) throws DataAccessException{
+    public model.AuthData getAuth(String authToken) throws DataAccessException, SQLException{
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM auths WHERE authToken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -25,18 +25,16 @@ public class AuthAccess {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new DataAccessException("Unable to read data.");
         }
         return null;
     }
 
-    public void deleteAuth(String authToken) throws DataAccessException{
+    public void deleteAuth(String authToken) throws DataAccessException, SQLException{
         var statement = "DELETE FROM auths WHERE authToken=?";
         ExecuteUpdate.execute(statement, authToken);
     }
 
-    public void deleteAuthData() throws DataAccessException{
+    public void deleteAuthData() throws DataAccessException, SQLException{
         var statement = "TRUNCATE auths";
         ExecuteUpdate.execute(statement);
     }

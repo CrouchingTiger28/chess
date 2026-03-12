@@ -55,6 +55,10 @@ public class Server {
                 context.status(400);
                 context.result("{ \"message\": \"Error: bad request\" }");
             }
+            catch (SQLException e) {
+                context.status(500);
+                context.result("{ \"message\": \"Error: server error\" }");
+            }
         });
 
         javalin.post("/session", ctx -> {
@@ -73,7 +77,10 @@ public class Server {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
-
+            catch (SQLException e) {
+                ctx.status(500);
+                ctx.result("{ \"message\": \"Error: server error\" }");
+            }
         });
 
         javalin.delete("/session", ctx -> {
@@ -88,6 +95,10 @@ public class Server {
             catch (NotAuthorizedException | DataAccessException e) {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
+            }
+            catch (SQLException e) {
+                ctx.status(500);
+                ctx.result("{ \"message\": \"Error: server error\" }");
             }
         });
 
@@ -104,7 +115,14 @@ public class Server {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
-
+            catch (DataAccessException e) {
+                ctx.status(500);
+                ctx.result("{\"message\": \"Error: server error\"}");
+            }
+            catch (SQLException e) {
+                ctx.status(500);
+                ctx.result("{ \"message\": \"Error: server error\" }");
+            }
         });
 
         javalin.post("/game", ctx -> {
@@ -124,6 +142,10 @@ public class Server {
             catch (BadRequestResponse e) {
                 ctx.status(400);
                 ctx.result("{ \"message\": \"Error: bad request\" }");
+            }
+            catch (SQLException e) {
+                ctx.status(500);
+                ctx.result("{ \"message\": \"Error: server error\" }");
             }
         });
 
@@ -146,19 +168,33 @@ public class Server {
                 ctx.result("{ \"message\": \"Error: already taken\" }");
             }
             catch (DataAccessException | BadRequestResponse e) {
-                e.printStackTrace();
                 ctx.status(400);
                 ctx.result("{ \"message\": \"Error: bad request\" }");
+            }
+            catch (SQLException e) {
+                ctx.status(500);
+                ctx.result("{ \"message\": \"Error: server error\" }");
             }
         });
 
         javalin.delete("/db", ctx -> {
-            userService.deleteUsers();
-            gameService.deleteGames();
-            authService.deleteAuths();
 
-            ctx.status(200);
-            ctx.json(java.util.Map.of());
+            try {
+                userService.deleteUsers();
+                gameService.deleteGames();
+                authService.deleteAuths();
+
+                ctx.status(200);
+                ctx.json(java.util.Map.of());
+            }
+            catch (DataAccessException e) {
+                ctx.status(400);
+                ctx.result("{ \"message\": \"Error: bad request\" }");
+            }
+            catch (SQLException e) {
+                ctx.status(500);
+                ctx.result("{ \"message\": \"Error: server error\" }");
+            }
         });
     }
 

@@ -13,7 +13,7 @@ public class GameAccess {
         this.gson = new Gson();
     }
 
-    public int createGame(GameData game) throws DataAccessException{
+    public int createGame(GameData game) throws DataAccessException, SQLException{
         if (game.gameID() == 0) {
             var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
             return ExecuteUpdate.execute(statement, game.whiteUsername(),
@@ -25,7 +25,7 @@ public class GameAccess {
         }
     }
 
-    public void updateGame(int gameID, String playercolor, String username) throws DataAccessException{
+    public void updateGame(int gameID, String playercolor, String username) throws DataAccessException, SQLException{
         GameData game = getGame(gameID);
         if (game == null) {
             throw new DataAccessException("game does not exist");
@@ -39,7 +39,7 @@ public class GameAccess {
             }
     }
 
-    public GameData getGame(int gameID) throws DataAccessException{
+    public GameData getGame(int gameID) throws DataAccessException, SQLException{
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM games WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -50,13 +50,11 @@ public class GameAccess {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new DataAccessException("Unable to read data.");
         }
         return null;
     }
 
-    public ArrayList<GameData> listGames() throws DataAccessException{
+    public ArrayList<GameData> listGames() throws DataAccessException, SQLException{
         ArrayList<GameData> result = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM games";
@@ -68,18 +66,15 @@ public class GameAccess {
                 }
             }
         }
-        catch (Exception e) {
-            throw new DataAccessException("Unable to read data");
-        }
         return result;
     }
 
-    public void deleteGame(int gameID) throws DataAccessException{
+    public void deleteGame(int gameID) throws DataAccessException, SQLException{
         var statement = "DELETE FROM games WHERE gameID=?";
         ExecuteUpdate.execute(statement, gameID);
     }
 
-    public void deleteGameData() throws DataAccessException {
+    public void deleteGameData() throws DataAccessException, SQLException{
         var statement = "TRUNCATE games";
         ExecuteUpdate.execute(statement);
     }

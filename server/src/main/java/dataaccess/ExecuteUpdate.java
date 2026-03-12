@@ -11,7 +11,7 @@ import static java.sql.Types.NULL;
 public class ExecuteUpdate {
 
 
-    static public int execute(String statement, Object... params) throws DataAccessException {
+    static public int execute(String statement, Object... params) throws DataAccessException, SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++) {
@@ -34,8 +34,6 @@ public class ExecuteUpdate {
 
                 return 0;
             }
-        } catch (SQLException e) {
-            throw new DataAccessException("Failed to update");
         }
     }
 }
