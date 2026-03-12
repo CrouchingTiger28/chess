@@ -13,7 +13,6 @@ import service.AlreadyTakenException;
 import service.InvalidLoginException;
 import service.NotAuthorizedException;
 
-import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -147,6 +146,7 @@ public class Server {
                 ctx.result("{ \"message\": \"Error: already taken\" }");
             }
             catch (DataAccessException | BadRequestResponse e) {
+                e.printStackTrace();
                 ctx.status(400);
                 ctx.result("{ \"message\": \"Error: bad request\" }");
             }
@@ -204,7 +204,7 @@ public class Server {
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256),
-              `game` JSON NOT NULL,
+              `game` varchar(256) NOT NULL,
               PRIMARY KEY (`gameID`)
               );
             """

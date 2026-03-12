@@ -16,7 +16,7 @@ public class AuthAccess {
 
     public model.AuthData getAuth(String authToken) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT authToken FROM auths WHERE authToken=?";
+            var statement = "SELECT * FROM auths WHERE authToken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -32,7 +32,7 @@ public class AuthAccess {
     }
 
     public void deleteAuth(String authToken) throws DataAccessException{
-        var statement = "DELETE FROM auths WHERE authToken+?";
+        var statement = "DELETE FROM auths WHERE authToken=?";
         ExecuteUpdate.execute(statement, authToken);
     }
 
