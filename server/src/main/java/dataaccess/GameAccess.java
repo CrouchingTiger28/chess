@@ -34,8 +34,10 @@ public class GameAccess {
 
             if (Objects.equals(playercolor, "white")) {
                 createGame(new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game()));
-            } else {
+            } else if (Objects.equals(playercolor, "black")) {
                 createGame(new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game()));
+            } else {
+                throw new DataAccessException("Invalid join data");
             }
     }
 
