@@ -236,7 +236,7 @@ public class Server {
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256),
-              `game` varchar(256) NOT NULL,
+              `game` TEXT NOT NULL,
               PRIMARY KEY (`gameID`)
               );
             """
