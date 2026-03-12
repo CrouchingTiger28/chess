@@ -189,21 +189,24 @@ public class Server {
               `email` varchar(256),
               PRIMARY KEY (`username`),
               INDEX(username)
+              );
             """,
             """
             CREATE TABLE IF NOT EXISTS  auths (
             `authToken` varchar(256) NOT NULL,
             `username` varchar(256) NOT NULL,
-            PRIMARY KEY (`authToken`),
+            PRIMARY KEY (`authToken`)
+            );
             """,
             """
             CREATE TABLE IF NOT EXISTS  games (
               `gameID` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
-              'gameName' varchar(256),
-              'game' chess.ChessGame NOT NULL,
+              `gameName` varchar(256),
+              `game` JSON NOT NULL,
               PRIMARY KEY (`gameID`)
+              );
             """
     };
 

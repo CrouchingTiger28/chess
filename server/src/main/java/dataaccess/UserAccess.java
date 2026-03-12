@@ -11,7 +11,7 @@ public class UserAccess {
 
     public model.UserData getUser(String username) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username FROM users WHERE username=?";
+            var statement = "SELECT username, password, email FROM users WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
