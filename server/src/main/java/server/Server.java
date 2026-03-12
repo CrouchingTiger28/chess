@@ -1,17 +1,10 @@
 package server;
 
 import dataaccess.DatabaseManager;
-import model.AuthData;
-import model.UserData;
-import model.GameData;
-import com.google.gson.Gson;
+import model.HandlerResponse;
 import dataaccess.DataAccessException;
 import io.javalin.*;
-import io.javalin.http.BadRequestResponse;
 import io.javalin.json.JavalinGson;
-import service.AlreadyTakenException;
-import service.InvalidLoginException;
-import service.NotAuthorizedException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,15 +14,13 @@ public class Server {
     private final Javalin javalin;
 
     public Server() {
-        Gson gson = new Gson();
         try {
             configureDatabase();
         } catch (DataAccessException ex) {
             System.out.println("No");
         }
-        service.AuthService authService = new service.AuthService();
-        service.GameService gameService = new service.GameService();
-        service.UserService userService = new service.UserService();
+        Handler handler = new Handler();
+
 
 
         javalin = Javalin.create(config -> {
@@ -40,157 +31,45 @@ public class Server {
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", context -> {
-            try {
-                UserData registerRequest = context.bodyAsClass(UserData.class);
-                AuthData registerResult = userService.register(registerRequest);
-
-                context.status(200);
-                context.json(registerResult);
-            }
-            catch(AlreadyTakenException e){
-                context.status(403);
-                context.result("{ \"message\": \"Error: already taken\" }");
-            }
-            catch(BadRequestResponse e) {
-                context.status(400);
-                context.result("{ \"message\": \"Error: bad request\" }");
-            }
-            catch (SQLException | DataAccessException e) {
-                context.status(500);
-                context.result("{ \"message\": \"Error: server error\" }");
-            }
+            HandlerResponse response = handler.register(context);
+            context.status(response.status());
+            context.result(response.result());
         });
 
         javalin.post("/session", ctx -> {
-            try {
-                UserData loginRequest = ctx.bodyAsClass(UserData.class);
-                AuthData loginResult = userService.login(loginRequest);
-
-                ctx.status(200);
-                ctx.json(gson.toJson(loginResult));
-            }
-            catch(BadRequestResponse e) {
-                ctx.status(400);
-                ctx.result("{ \"message\": \"Error: bad request\" }");
-            }
-            catch(InvalidLoginException e) {
-                ctx.status(401);
-                ctx.result("{ \"message\": \"Error: unauthorized\" }");
-            }
-            catch (SQLException | DataAccessException e) {
-                ctx.status(500);
-                ctx.result("{ \"message\": \"Error: server error\" }");
-            }
+            HandlerResponse response = handler.login(ctx);
+            ctx.status(response.status());
+            ctx.result(response.result());
         });
 
         javalin.delete("/session", ctx -> {
-            String token = extractAuth(ctx.header("Authorization"));
-
-            try {
-                authService.logout(token);
-
-                ctx.status(200);
-                ctx.result("");
-            }
-            catch (NotAuthorizedException  e) {
-                ctx.status(401);
-                ctx.result("{ \"message\": \"Error: unauthorized\" }");
-            }
-            catch (SQLException | DataAccessException e) {
-                ctx.status(500);
-                ctx.result("{ \"message\": \"Error: server error\" }");
-            }
+            HandlerResponse response = handler.logout(ctx);
+            ctx.status(response.status());
+            ctx.result(response.result());
         });
 
         javalin.get("/game", ctx -> {
-            String token = extractAuth(ctx.header("Authorization"));
-
-            try {
-                model.GameList games = gameService.listGames(token);
-
-                ctx.status(200);
-                ctx.json(games);
-            }
-            catch (NotAuthorizedException e) {
-                ctx.status(401);
-                ctx.result("{ \"message\": \"Error: unauthorized\" }");
-            }
-            catch (DataAccessException e) {
-                ctx.status(500);
-                ctx.result("{\"message\": \"Error: server error\"}");
-            }
-            catch (SQLException e) {
-                ctx.status(500);
-                ctx.result("{ \"message\": \"Error: server error\" }");
-            }
+            HandlerResponse response = handler.listGames(ctx);
+            ctx.status(response.status());
+            ctx.result(response.result());
         });
 
         javalin.post("/game", ctx -> {
-            String token = extractAuth(ctx.header("Authorization"));
-
-            try {
-                GameData newGameRequest = ctx.bodyAsClass(GameData.class);
-                int newGameResult = gameService.createGame(newGameRequest, token);
-
-                ctx.status(200);
-                ctx.json(gson.toJson(new model.GameIDValue(newGameResult)));
-            }
-            catch (NotAuthorizedException e) {
-                ctx.status(401);
-                ctx.result("{ \"message\": \"Error: unauthorized\" }");
-            }
-            catch (BadRequestResponse e) {
-                ctx.status(400);
-                ctx.result("{ \"message\": \"Error: bad request\" }");
-            }
-            catch (SQLException | DataAccessException e) {
-                ctx.status(500);
-                ctx.result("{ \"message\": \"Error: server error\" }");
-            }
+            HandlerResponse response = handler.createGame(ctx);
+            ctx.status(response.status());
+            ctx.result(response.result());
         });
 
         javalin.put("/game", ctx -> {
-            String token = extractAuth(ctx.header("Authorization"));
-
-            try {
-                model.JoinRequest joinGameRequest = ctx.bodyAsClass(model.JoinRequest.class);
-                gameService.joinGame(joinGameRequest, token);
-
-                ctx.status(200);
-                ctx.result("");
-            }
-            catch (NotAuthorizedException e) {
-                ctx.status(401);
-                ctx.result("{ \"message\": \"Error: unauthorized\" }");
-            }
-            catch (AlreadyTakenException e) {
-                ctx.status(403);
-                ctx.result("{ \"message\": \"Error: already taken\" }");
-            }
-            catch (BadRequestResponse e) {
-                ctx.status(400);
-                ctx.result("{ \"message\": \"Error: bad request\" }");
-            }
-            catch (SQLException | DataAccessException e) {
-                ctx.status(500);
-                ctx.result("{ \"message\": \"Error: server error\" }");
-            }
+            HandlerResponse response = handler.joinGame(ctx);
+            ctx.status(response.status());
+            ctx.result(response.result());
         });
 
         javalin.delete("/db", ctx -> {
-
-            try {
-                userService.deleteUsers();
-                gameService.deleteGames();
-                authService.deleteAuths();
-
-                ctx.status(200);
-                ctx.json(java.util.Map.of());
-            }
-            catch (SQLException | DataAccessException e) {
-                ctx.status(500);
-                ctx.result("{ \"message\": \"Error: server error\" }");
-            }
+            HandlerResponse response = handler.clear();
+            ctx.status(response.status());
+            ctx.result(response.result());
         });
     }
 
@@ -203,15 +82,7 @@ public class Server {
         javalin.stop();
     }
 
-    private String extractAuth(String header) {
-        String token;
-        if (header != null && header.startsWith("Bearer ")) {
-            token = header.substring("Bearer ".length());
-        } else {
-            token = header;
-        }
-        return token;
-    }
+
 
     private final String[] createStatements = {
             """
