@@ -167,11 +167,11 @@ public class Server {
                 ctx.status(403);
                 ctx.result("{ \"message\": \"Error: already taken\" }");
             }
-            catch (DataAccessException | BadRequestResponse e) {
+            catch (BadRequestResponse e) {
                 ctx.status(400);
                 ctx.result("{ \"message\": \"Error: bad request\" }");
             }
-            catch (SQLException e) {
+            catch (SQLException | DataAccessException e) {
                 ctx.status(500);
                 ctx.result("{ \"message\": \"Error: server error\" }");
             }
