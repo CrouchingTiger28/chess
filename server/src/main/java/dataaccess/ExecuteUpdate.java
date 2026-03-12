@@ -14,20 +14,10 @@ public class ExecuteUpdate {
     static public int execute(String statement, Object... params) throws DataAccessException, SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    switch (param) {
-                        case String p -> ps.setString(i + 1, p);
-                        case Integer p -> ps.setInt(i + 1, p);
-                        case model.GameData p -> ps.setString(i + 1, p.toString());
-                        case null -> ps.setNull(i + 1, NULL);
-                        default -> {
-                        }
-                    }
-                }
-                ps.executeUpdate();
+                PreparedStatement psWithParam = replaceParameters(ps, params);
+                psWithParam.executeUpdate();
 
-                ResultSet rs = ps.getGeneratedKeys();
+                ResultSet rs = psWithParam.getGeneratedKeys();
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
@@ -35,5 +25,20 @@ public class ExecuteUpdate {
                 return 0;
             }
         }
+    }
+
+    static private PreparedStatement replaceParameters(PreparedStatement ps, Object... params) throws SQLException{
+        for (int i = 0; i < params.length; i++) {
+            Object param = params[i];
+            switch (param) {
+                case String p -> ps.setString(i + 1, p);
+                case Integer p -> ps.setInt(i + 1, p);
+                case model.GameData p -> ps.setString(i + 1, p.toString());
+                case null -> ps.setNull(i + 1, NULL);
+                default -> {
+                }
+            }
+        }
+        return ps;
     }
 }
