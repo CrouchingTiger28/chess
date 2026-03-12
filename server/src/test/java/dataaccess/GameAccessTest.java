@@ -1,8 +1,6 @@
 package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import dataaccess.GameAccess;
 import model.GameData;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
