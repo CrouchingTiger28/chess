@@ -202,7 +202,7 @@ public class Server {
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               'gameName' varchar(256),
-              'game' chess.ChessGame,
+              'game' chess.ChessGame NOT NULL,
               PRIMARY KEY (`gameID`)
             """
     };

@@ -12,7 +12,7 @@ public class GameService {
 
     }
 
-    public void deleteGames() {
+    public void deleteGames() throws DataAccessException{
         games.deleteGameData();
     }
 
@@ -28,9 +28,7 @@ public class GameService {
         }
         checkAuth(authToken);
 
-        int id = games.getCurrentID();
-        games.createGame(new GameData(id, null, null, newGame.gameName(), new ChessGame()));
-        return id;
+        return games.createGame(new GameData(0, null, null, newGame.gameName(), new ChessGame()));
     }
 
     public void joinGame(model.JoinRequest request, String authToken) throws AlreadyTakenException, DataAccessException {

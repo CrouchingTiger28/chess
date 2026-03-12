@@ -4,9 +4,6 @@ import model.*;
 
 import java.sql.*;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
-
 public class UserAccess {
 
     public UserAccess() {
@@ -14,7 +11,7 @@ public class UserAccess {
 
     public model.UserData getUser(String username) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username FROM auths WHERE username=?";
+            var statement = "SELECT username FROM users WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
