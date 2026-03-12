@@ -92,11 +92,11 @@ public class Server {
                 ctx.status(200);
                 ctx.result("");
             }
-            catch (NotAuthorizedException | DataAccessException e) {
+            catch (NotAuthorizedException  e) {
                 ctx.status(401);
                 ctx.result("{ \"message\": \"Error: unauthorized\" }");
             }
-            catch (SQLException e) {
+            catch (SQLException | DataAccessException e) {
                 ctx.status(500);
                 ctx.result("{ \"message\": \"Error: server error\" }");
             }
