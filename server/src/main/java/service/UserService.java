@@ -44,7 +44,7 @@ public class UserService {
         }
     }
 
-    public void deleteUsers() {
+    public void deleteUsers() throws DataAccessException{
         users.deleteUserData();
     }
 }
