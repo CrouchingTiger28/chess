@@ -8,14 +8,17 @@ import java.util.Scanner;
 
 public class ClientMain {
 
+    private boolean loggedIn = false;
+    private String authToken = null;
+
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
-        menu();
+        ClientMain self = new ClientMain();
+        self.menu();
     }
 
-    private static void menu() {
-        Boolean loggedIn = false;
+    private void menu() {
         Scanner scanner = new Scanner(System.in);
         int input;
         boolean displayMenu = true;
@@ -29,7 +32,6 @@ public class ClientMain {
 
             try {
                 input = scanner.nextInt();
-                System.out.println(input);
 
                 if (loggedIn) {
                     postloginMenuItem(input);
@@ -45,7 +47,7 @@ public class ClientMain {
         scanner.close();
     }
 
-    private static void printPreloginMenu() {
+    private void printPreloginMenu() {
         List<String> options = List.of("login", "register", "help", "quit");
         for (var i = 0; i < options.size(); i++) {
             System.out.printf("\t%d. %s%n", i+1, options.get(i));
@@ -53,7 +55,7 @@ public class ClientMain {
         System.out.print("\n");
     }
 
-    private static void printPostloginMenu() {
+    private void printPostloginMenu() {
         List<String> options = List.of("help", "logout", "create game", "list games", "play game", "observe game");
         for (var i = 0; i < options.size(); i++) {
             System.out.printf("\t%d. %s%n", i+1, options.get(i));
@@ -61,7 +63,7 @@ public class ClientMain {
         System.out.print("\n");
     }
 
-    private static void printHelp(Boolean loggedIn) {
+    private void printHelp(Boolean loggedIn) {
         String preLoginHelp  = "This is the help string before logging in.";
         String postLoginHelp = "This is the help string after logging in.";
 
@@ -72,28 +74,26 @@ public class ClientMain {
         }
     }
 
-    private static boolean preloginMenuItem(int option) {
-        if (0 <= option && option <= 5) {
-            switch(option) {
-                case 1:
-                    //login
-                    return true;
-                case 2:
-                    //register
-                    return true;
-                case 3:
-                    printHelp(false);
-                    return true;
-                case 4:
-                    return false;
-            }
-        } else {
-            System.out.printf("%d %s", option, "is not a valid input. Select help (3) for additional assistance.");
-            return true;
+    private boolean preloginMenuItem(int option) {
+        switch(option) {
+            case 1:
+                //login
+                return true;
+            case 2:
+                //register
+                return true;
+            case 3:
+                printHelp(false);
+                return true;
+            case 4:
+                return false;
+            default:
+                System.out.printf("%d %s", option, "is not a valid input. Select help (3) for additional assistance.");
+                return true;
         }
     }
 
-    private static void postloginMenuItem(int option) {
+    private void postloginMenuItem(int option) {
         if (0 <= option && option <= 7) {
             switch(option) {
                 case 1:
