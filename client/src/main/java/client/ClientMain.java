@@ -77,10 +77,12 @@ public class ClientMain {
     private boolean preloginMenuItem(int option) {
         switch(option) {
             case 1:
-                //login
+                loggedIn = true;
+
                 return true;
             case 2:
-                //register
+                loggedIn = true;
+
                 return true;
             case 3:
                 printHelp(false);
@@ -88,29 +90,33 @@ public class ClientMain {
             case 4:
                 return false;
             default:
-                System.out.printf("%d %s", option, "is not a valid input. Select help (3) for additional assistance.");
+                System.out.printf("%d %s", option, "is not a valid input. Select help (3) for additional assistance.\n");
                 return true;
         }
     }
 
     private void postloginMenuItem(int option) {
-        if (0 <= option && option <= 7) {
-            switch(option) {
-                case 1:
-                    printHelp(true);
-                case 2:
-                    //logout
-                case 3:
-                    //create game
-                case 4:
-                    //list games
-                case 5:
-                    //play game
-                case 6:
-                    //observe game
-            }
-        } else {
-            System.out.printf("%d %s", option, "is not a valid input. Select help (1) for additional assistance.");
+        switch(option) {
+            case 1:
+                printHelp(true);
+                break;
+            case 2:
+                loggedIn = false;
+                break;
+            case 3:
+                //create game
+                break;
+            case 4:
+                //list games
+                break;
+            case 5:
+                //play game
+                break;
+            case 6:
+                //observe game
+                break;
+            default:
+                System.out.printf("%d %s", option, "is not a valid input. Select help (1) for additional assistance.\n");
         }
     }
 }
