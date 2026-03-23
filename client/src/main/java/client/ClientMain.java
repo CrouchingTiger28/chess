@@ -2,6 +2,7 @@ package client;
 
 import chess.*;
 import model.GameData;
+import model.GameList;
 import ui.DrawBoard;
 
 import java.util.InputMismatchException;
@@ -13,62 +14,64 @@ public class ClientMain {
     private boolean loggedIn = false;
     private String authToken = null;
     private ui.DrawBoard boardPen = new ui.DrawBoard();
-    private List<GameData> gameList = List.of();
+    private GameList gameList = null;
     private static ServerFacade serverFacade = new ServerFacade();
+    private String menuLayer = "first";
+    private Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
         ClientMain self = new ClientMain();
+        self.updateGameList();
         self.menu();
     }
 
-    private void menu() {
-        Scanner scanner = new Scanner(System.in);
+    private int repl(List<String> options, int numOfOptions) {
         int input;
-        boolean displayMenu = true;
 
-        while (displayMenu) {
-            if (!loggedIn) {
-                printPreloginMenu();
-            } else {
-                printPostloginMenu();
+        while (true) {
+            for (var i = 0; i < options.size(); i++) {
+                System.out.printf("\t%d. %s%n", i + 1, options.get(i));
             }
+            System.out.print("\n");
 
             try {
                 input = scanner.nextInt();
 
-                if (loggedIn) {
-                    postloginMenuItem(input);
-                } else {
-                    displayMenu = preloginMenuItem(input);
+                if (0 < input && input <= numOfOptions) {
+                    return input;
                 }
             } catch (InputMismatchException ex) {
-                System.out.println("Invalid input. Please try again.\n");
+                System.out.println("Invalid input. Please try again.\n Select Help for more information.\n");
                 scanner.next();
-                printHelp(loggedIn);
             }
         }
+
+    }
+
+    private void menu() {
+        int firstChoice;
+        int secondChoice;
+
+        while (true) {
+
+            if (!loggedIn) {
+                firstChoice = repl(List.of("login", "register", "help", "quit"), 4);
+                if (!preloginMenuItem(firstChoice)) {
+                    break;
+                }
+            } else {
+                secondChoice = repl(List.of("help", "logout", "create game", "list games", "play game", "observe game"), 6);
+                postloginMenuItem(secondChoice);
+            }
+
+        }
         scanner.close();
+
     }
 
-    private void printPreloginMenu() {
-        List<String> options = List.of("login", "register", "help", "quit");
-        for (var i = 0; i < options.size(); i++) {
-            System.out.printf("\t%d. %s%n", i + 1, options.get(i));
-        }
-        System.out.print("\n");
-    }
-
-    private void printPostloginMenu() {
-        List<String> options = List.of("help", "logout", "create game", "list games", "play game", "observe game");
-        for (var i = 0; i < options.size(); i++) {
-            System.out.printf("\t%d. %s%n", i + 1, options.get(i));
-        }
-        System.out.print("\n");
-    }
-
-    private void printHelp(Boolean loggedIn) {
+    private void printHelp() {
         String preLoginHelp = "This is the help string before logging in.";
         String postLoginHelp = "This is the help string after logging in.";
 
@@ -90,7 +93,7 @@ public class ClientMain {
                 loggedIn = true;
                 return true;
             case 3:
-                printHelp(false);
+                printHelp();
                 return true;
             case 4:
                 //quit
@@ -104,7 +107,7 @@ public class ClientMain {
     private void postloginMenuItem(int option) {
         switch (option) {
             case 1:
-                printHelp(true);
+                printHelp();
                 break;
             case 2:
                 loggedIn = false;
@@ -114,6 +117,7 @@ public class ClientMain {
                 break;
             case 4:
                 //list games
+                listGames();
                 break;
             case 5:
                 //play game
@@ -121,9 +125,53 @@ public class ClientMain {
                 break;
             case 6:
                 //observe game
+                watchGame();
                 break;
             default:
                 System.out.printf("%d %s", option, "is not a valid input. Select help (1) for additional assistance.\n");
+        }
+    }
+
+    private void listGames() {
+        updateGameList();
+        String whitePlayer;
+        String blackPlayer;
+        for (int i = 0; i < gameList.games().size(); i ++) {
+            GameData game = gameList.games().get(i);
+            whitePlayer = (game.whiteUsername() == null) ? "none" : game.whiteUsername();
+            blackPlayer = (game.blackUsername() == null) ? "none" : game.blackUsername();
+            System.out.printf("%d: %s. %s: %s, %s: %s%n%n", i+1, game.gameName(), "White Player", game.whiteUsername(), "Black Player", game.blackUsername());
+        }
+    }
+
+    private boolean watchGame() {
+        Scanner scanner = new Scanner(System.in);
+        int input = 0;
+        boolean tryJoin = true;
+        int gameID = 0;
+
+        while (tryJoin) {
+            try {
+                input = scanner.nextInt();
+
+                if (input == 0) {
+                    tryJoin = false;
+                }
+
+                gameID = getGameID(input);
+                if (gameID > 0) {
+                    tryJoin = false;
+                }
+            } catch (InputMismatchException ex) {
+                System.out.println("Invalid input. Please try again.\n Return to previous menu by pressing 0.\n");
+                scanner.next();
+            }
+        }
+        if (input == 0) {
+            return false;
+        } else {
+            boardPen.drawWhite();
+            return true;
         }
     }
 
@@ -170,7 +218,7 @@ public class ClientMain {
 
     private int getGameID(int gameNumber) {
         try {
-            return gameList.get(gameNumber).gameID();
+            return gameList.games().get(gameNumber - 1).gameID();
         } catch (IndexOutOfBoundsException ex) {
             return 0;
         }
