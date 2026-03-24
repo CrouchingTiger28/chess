@@ -130,6 +130,10 @@ public class ClientMain {
         }
     }
 
+    private void logout() {
+
+    }
+
     private boolean preloginMenuItem(int option) {
         switch (option) {
             case 1:

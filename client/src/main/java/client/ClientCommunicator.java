@@ -31,8 +31,10 @@ public class ClientCommunicator {
         switch (path) {
             case "/session":
                 reqBody = String.format("{ \"username\":\"%s\", \"password\":\"%s\" }", args[0], args[1]);
+                break;
             case "/user":
                 reqBody = String.format("\t{ \"username\":\"%s\", \"password\":\"%s\", \"email\":\"%s\" }", args[0], args[1], args[2]);
+                break;
             default:
                 reqBody = null;
         }
@@ -68,9 +70,7 @@ public class ClientCommunicator {
             int status = response.statusCode();
 
             if (status / 100 != 2) {
-                throw new RuntimeException(
-                        "HTTP " + status + " : " + response.body()
-                );
+                throw new RuntimeException("HTTP " + status + " : " + response.body());
             }
 
             if (responseClass == Void.class) {
