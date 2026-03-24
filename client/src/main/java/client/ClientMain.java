@@ -4,7 +4,6 @@ import chess.*;
 import model.GameData;
 import model.GameList;
 import model.UserData;
-import ui.DrawBoard;
 
 import java.util.InputMismatchException;
 import java.util.List;
@@ -15,10 +14,10 @@ public class ClientMain {
 
     private boolean loggedIn = false;
     private String authToken = null;
-    private ui.DrawBoard boardPen = new ui.DrawBoard();
+    private final ui.DrawBoard boardPen = new ui.DrawBoard();
     private GameList gameList = null;
-    private static ServerFacade serverFacade = new ServerFacade();
-    private Scanner scanner = new Scanner(System.in);
+    private static final ServerFacade serverFacade = new ServerFacade();
+    private final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -333,9 +332,9 @@ public class ClientMain {
 
     private void drawBoard(String color, GameData game) {
         if (color.equalsIgnoreCase("WHITE")) {
-            boardPen.drawWhite(game, gameList);
+            boardPen.drawWhite(game);
         } else {
-            boardPen.drawBlack(game, gameList);
+            boardPen.drawBlack(game);
         }
     }
 }
