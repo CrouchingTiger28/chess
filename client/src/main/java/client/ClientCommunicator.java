@@ -26,7 +26,7 @@ public class ClientCommunicator {
 
     }
 
-    public AuthData doPost(String path, String... args) {
+    public AuthData doPost(String path, String Authtoken, String... args) {
         String reqBody;
         switch (path) {
             case "/session":
@@ -39,6 +39,10 @@ public class ClientCommunicator {
                 reqBody = null;
         }
         return makeRequest("POST", path, reqBody, null, AuthData.class);
+    }
+
+    public void doDelete(String path, String authToken) {
+        makeRequest("DELETE", path, null, authToken, null);
     }
 
     public GameList listGames() {
@@ -73,7 +77,7 @@ public class ClientCommunicator {
                 throw new RuntimeException("HTTP " + status + " : " + response.body());
             }
 
-            if (responseClass == Void.class) {
+            if (responseClass == null) {
                 return null;
             }
 

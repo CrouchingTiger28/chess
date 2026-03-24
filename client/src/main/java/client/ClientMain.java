@@ -130,8 +130,25 @@ public class ClientMain {
         }
     }
 
-    private void logout() {
+    private boolean logout() {
+        scanner.nextLine();
+        String response;
+        List<String> affirmative = List.of("yes", "YES", "Yes", "y", "Y");
+        List<String> negative = List.of("no", "NO", "No", "n", "N");
 
+        while (authToken != null) {
+            System.out.print("Are you sure you want to log out? (yes/no)\n");
+            response = scanner.next();
+
+            if (affirmative.contains(response)) {
+                serverFacade.logout(authToken);
+                authToken = null;
+            } else if (negative.contains(response)) {
+                return false;
+            }
+
+        }
+        return true;
     }
 
     private boolean preloginMenuItem(int option) {
@@ -163,7 +180,8 @@ public class ClientMain {
                 printHelp();
                 break;
             case 2:
-                loggedIn = false;
+                //logout
+                loggedIn = !logout();
                 break;
             case 3:
                 //create game
