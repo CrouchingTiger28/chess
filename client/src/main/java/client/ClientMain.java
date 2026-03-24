@@ -18,7 +18,6 @@ public class ClientMain {
     private ui.DrawBoard boardPen = new ui.DrawBoard();
     private GameList gameList = null;
     private static ServerFacade serverFacade = new ServerFacade();
-    private String menuLayer = "first";
     private Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -44,7 +43,7 @@ public class ClientMain {
                     return input;
                 }
             } catch (InputMismatchException ex) {
-                System.out.println("Invalid input. Please try again.\nSelect Help for more information.\n");
+                System.out.printf("Invalid input. Please try again.%n Input must be a whole number between 1 and %d.%n", numOfOptions);
                 scanner.next();
             }
         }
@@ -63,7 +62,7 @@ public class ClientMain {
                     break;
                 }
             } else {
-                secondChoice = repl(List.of("help", "logout", "create game", "list games", "play game", "observe game"), 6);
+                secondChoice = repl(List.of("help", "logout", "create game", "list games", "join game", "observe game"), 6);
                 postloginMenuItem(secondChoice);
             }
 
@@ -218,6 +217,22 @@ public class ClientMain {
 
     }
 
+    private void joinGame() {
+        updateGameList();
+        System.out.println("What game would you like to join?");
+        int gameNumber = repl(List.of(), gameList.games().size());
+
+        System.out.println("What color do you want to join as?");
+        int color = repl(List.of("White", "Black"), 2);
+
+        String colorName = (color == 1) ? "WHITE" : "BLACK";
+        int gameID = getGameID(gameNumber);
+
+        serverFacade.joinGame(authToken, colorName, gameID);
+        System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
+        drawboard(colorName);
+    }
+
     private boolean preloginMenuItem(int option) {
         switch (option) {
             case 1:
@@ -264,6 +279,7 @@ public class ClientMain {
                 break;
             case 5:
                 //play game
+                joinGame();
                 break;
             case 6:
                 //observe game
@@ -282,6 +298,14 @@ public class ClientMain {
             return gameList.games().get(gameNumber - 1).gameID();
         } catch (IndexOutOfBoundsException ex) {
             return 0;
+        }
+    }
+
+    private void drawboard(String color) {
+        if (color.equalsIgnoreCase("WHITE")) {
+            boardPen.drawWhite();
+        } else {
+            boardPen.drawBlack();
         }
     }
 }

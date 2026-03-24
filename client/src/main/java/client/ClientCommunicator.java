@@ -26,6 +26,11 @@ public class ClientCommunicator {
 
     }
 
+    public void joinGame(String authToken, String playerColor, int ID) {
+        String reqBody = String.format("{ \"playerColor\":\"%s\", \"gameID\": %d }", playerColor, ID);
+        makeRequest("PUT", "/game", reqBody, authToken, null);
+    }
+
     public AuthData doPost(String path, String authToken, String... args) {
         String reqBody;
         switch (path) {
@@ -49,7 +54,7 @@ public class ClientCommunicator {
     }
 
     public GameList listGames(String path, String authToken) {
-        return makeRequest("GET", path, null, authToken, null);
+        return makeRequest("GET", path, null, authToken, GameList.class);
     }
 
     private <T> T makeRequest(String method, String path, String request, String authtoken, Class<T> responseClass) throws RuntimeException {
