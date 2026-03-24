@@ -43,7 +43,7 @@ public class ClientMain {
                     return input;
                 }
             } catch (InputMismatchException ex) {
-                System.out.printf("Invalid input. Please try again.%n Input must be a whole number between 1 and %d.%n", numOfOptions);
+                System.out.printf("Invalid input. Please try again.%nInput must be a whole number between 1 and %d.%n", numOfOptions);
                 scanner.next();
             }
         }
@@ -97,57 +97,63 @@ public class ClientMain {
         }
     }
 
-    private void register() {
+    private boolean register() {
         scanner.nextLine();
         String username;
         String password1 = null;
         String password2 = "other null";
         String email;
 
-        while (authToken == null) {
-            System.out.print("Please create a username: \n");
-            username = scanner.nextLine();
 
-            while (!Objects.equals(password1, password2)) {
-                System.out.print("Please create a password: \n");
-                password1 = scanner.nextLine();
+        System.out.print("Please create a username: \n");
+        username = scanner.nextLine();
 
-                System.out.print("Please repeat your password: \n");
-                password2 = scanner.nextLine();
+        while (!Objects.equals(password1, password2)) {
+            System.out.print("Please create a password: \n");
+            password1 = scanner.nextLine();
 
-                if (!Objects.equals(password1, password2)) {
-                    System.out.println("Passwords don't match!");
-                }
-            }
+            System.out.print("Please repeat your password: \n");
+            password2 = scanner.nextLine();
 
-            System.out.print("Please input email: \n");
-            email = scanner.nextLine();
-
-            authToken = serverFacade.register(new UserData(username, password1, email));
-
-            if (authToken != null) {
-                System.out.println("Registering you...\n");
+            if (!Objects.equals(password1, password2)) {
+                System.out.println("Passwords don't match!");
             }
         }
+
+        System.out.print("Please input email: \n");
+        email = scanner.nextLine();
+
+        authToken = serverFacade.register(new UserData(username, password1, email));
+
+        if (authToken != null) {
+            System.out.println("Registering you...\n");
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
-    private void login() {
+    private boolean login() {
         scanner.nextLine();
         String username = "something went wrong";
         String password = "something else went wrong";
 
-        while (authToken == null) {
-            System.out.print("Please input username: \n");
-            username = scanner.nextLine();
 
-            System.out.print("Please input password: \n");
-            password = scanner.nextLine();
+        System.out.print("Please input username: \n");
+        username = scanner.nextLine();
 
-            authToken = serverFacade.login(new UserData(username, password, null));
+        System.out.print("Please input password: \n");
+        password = scanner.nextLine();
 
-            if (authToken != null) {
-                System.out.println("Logging you in...\n");
-            }
+        authToken = serverFacade.login(new UserData(username, password, null));
+
+        if (authToken != null) {
+            System.out.println("Logging you in...\n");
+            return true;
+
+        } else {
+            return false;
         }
     }
 
@@ -219,41 +225,53 @@ public class ClientMain {
 
     private void joinGame() {
         updateGameList();
+        if (gameList.games().isEmpty()) {
+            System.out.println("There aren't any games yet!\nCreate a game to play.");
+            return;
+        }
         System.out.println("What game would you like to join?");
+        listGames();
         int gameNumber = repl(List.of(), gameList.games().size());
 
         System.out.println("What color do you want to join as?");
         int color = repl(List.of("White", "Black"), 2);
 
         String colorName = (color == 1) ? "WHITE" : "BLACK";
-        int gameID = getGameID(gameNumber);
+        GameData game = getGame(gameNumber);
 
-        serverFacade.joinGame(authToken, colorName, gameID);
-        System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
-        drawboard(colorName, gameID);
+        int gameID = (game != null)? game.gameID() : null;
+
+        if (serverFacade.joinGame(authToken, colorName, gameID)) {
+            System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
+            drawBoard(colorName, game);
+        }
     }
 
     private void observeGame() {
         updateGameList();
+        if (gameList.games().isEmpty()) {
+            System.out.println("There aren't any games yet!\nCreate a game to play.");
+            return;
+        }
+
         System.out.println("What game would you like to observe?");
+        listGames();
         int gameNumber = repl(List.of(), gameList.games().size());
 
-        int gameID = getGameID(gameNumber);
+        GameData game = getGame(gameNumber);
 
         System.out.printf("Alright, observing game %d from white's perspective...%n", gameNumber);
-        drawboard("White", gameID);
+        drawBoard("White", game);
     }
 
     private boolean preloginMenuItem(int option) {
         switch (option) {
             case 1:
-                login();
-                loggedIn = true;
+                loggedIn = login();
                 return true;
             case 2:
                 //register
-                register();
-                loggedIn = true;
+                loggedIn = register();
                 return true;
             case 3:
                 printHelp();
@@ -305,19 +323,19 @@ public class ClientMain {
         gameList = serverFacade.listGames(authToken);
     }
 
-    private int getGameID(int gameNumber) {
+    private GameData getGame(int gameNumber) {
         try {
-            return gameList.games().get(gameNumber - 1).gameID();
+            return gameList.games().get(gameNumber - 1);
         } catch (IndexOutOfBoundsException ex) {
-            return 0;
+            return null;
         }
     }
 
-    private void drawboard(String color, int gameID) {
+    private void drawBoard(String color, GameData game) {
         if (color.equalsIgnoreCase("WHITE")) {
-            boardPen.drawWhite(gameID, gameList);
+            boardPen.drawWhite(game, gameList);
         } else {
-            boardPen.drawBlack(gameID, gameList);
+            boardPen.drawBlack(game, gameList);
         }
     }
 }

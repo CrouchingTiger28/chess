@@ -99,9 +99,10 @@ public class ServerFacade {
         }
     }
 
-    public void joinGame(String authToken, String playerColor, int gameID) {
+    public boolean joinGame(String authToken, String playerColor, int gameID) {
         try {
             comm.joinGame(authToken, playerColor, gameID);
+            return true;
         } catch (RuntimeException ex) {
             switch (ex.getMessage()) {
                 case "400":
@@ -112,9 +113,11 @@ public class ServerFacade {
                     break;
                 case "403":
                     System.out.printf("Oops! There's already a %s player in that game!%n%n", playerColor.toLowerCase());
+                    break;
                 default:
                     System.out.println("Internal server error occurred. Please come back later.");
             }
+            return false;
         }
     }
 
