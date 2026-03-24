@@ -8,6 +8,7 @@ import model.GameData;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Objects;
 
 public class DrawBoard {
 
@@ -16,35 +17,16 @@ public class DrawBoard {
 
     }
 
-    public void drawWhite(GameData game) {
-        List<String> columns = List.of("a", "b", "c", "d", "e", "f", "g", "h");
+    public void draw(GameData game, String colorPerspective) {
+        List<String> columns = (Objects.equals(colorPerspective, "White")) ?
+                List.of("a", "b", "c", "d", "e", "f", "g", "h") : List.of("h", "g", "f", "e", "d", "c", "b", "a");
         borderText();
 
         headerAndFooter(columns);
 
         ChessBoard board = game.game().getBoard();
-        for (int y = 8; y >= 1; y--) {
-            borderText();
-            System.out.printf(" %d ", y);
-
-            out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
-            for (int x = 1; x <= 8; x++) {
-
-                if ((x + y) % 2 != 1) {
-                    out.print(EscapeSequences.SET_BG_COLOR_DARK_BROWN);
-                } else {
-                    out.print(EscapeSequences.SET_BG_COLOR_PALE_BROWN);
-                }
-                ChessPiece piece = board.getPiece(new ChessPosition(y, x));
-                System.out.print(getSymbol(piece));
-
-            }
-            borderText();
-            System.out.printf(" %d ", y);
-
-            out.print(EscapeSequences.RESET_BG_COLOR);
-            System.out.println();
-        }
+        boolean reverse = !Objects.equals(colorPerspective, "White");
+        drawBoardBlock(board, reverse);
 
         headerAndFooter(columns);
 
@@ -52,40 +34,39 @@ public class DrawBoard {
         out.print(EscapeSequences.RESET_TEXT_COLOR);
     }
 
-    public void drawBlack(GameData game) {
-        List<String> columns = List.of("h", "g", "f", "e", "d", "c", "b", "a");
-        borderText();
-
-        headerAndFooter(columns);
-
-        ChessBoard board = game.game().getBoard();
-        for (int y = 1; y <= 8; y++) {
+    public void drawBoardBlock(ChessBoard board, Boolean reverse) {
+        for (int y = 8; y >= 1; y--) {
             borderText();
-            System.out.printf(" %d ", y);
+            int row = (reverse) ? 9-y : y;
+            System.out.printf(" %d ", row);
 
             out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
-            for (int x = 8; x >= 1; x--) {
+            for (int x = 1; x <= 8; x++) {
+                int column = (reverse) ? 9-x : x;
 
-                if ((x + y) % 2 != 1) {
+                if ((column + row) % 2 != 1) {
                     out.print(EscapeSequences.SET_BG_COLOR_DARK_BROWN);
                 } else {
                     out.print(EscapeSequences.SET_BG_COLOR_PALE_BROWN);
                 }
-                ChessPiece piece = board.getPiece(new ChessPosition(y, x));
+                ChessPiece piece = board.getPiece(new ChessPosition(row, column));
                 System.out.print(getSymbol(piece));
 
             }
             borderText();
-            System.out.printf(" %d ", y);
+            System.out.printf(" %d ", row);
 
             out.print(EscapeSequences.RESET_BG_COLOR);
             System.out.println();
         }
+    }
 
-        headerAndFooter(columns);
+    public void drawWhite(GameData game) {
+        draw(game, "White");
+    }
 
-        out.print(EscapeSequences.RESET_BG_COLOR);
-        out.print(EscapeSequences.RESET_TEXT_COLOR);
+    public void drawBlack(GameData game) {
+        draw(game, "Black");
     }
 
     private void borderText() {

@@ -1,6 +1,5 @@
 package client;
 
-import chess.ChessGame;
 import model.*;
 
 import com.google.gson.Gson;
@@ -8,14 +7,8 @@ import com.google.gson.Gson;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.http.HttpClient;
-import java.util.ArrayList;
-import java.util.List;
 import java.net.http.*;
-import java.net.http.HttpRequest.BodyPublisher;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
 
 public class ClientCommunicator {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -26,26 +19,19 @@ public class ClientCommunicator {
 
     }
 
-    public void joinGame(String authToken, String playerColor, int ID) {
-        String reqBody = String.format("{ \"playerColor\":\"%s\", \"gameID\": %d }", playerColor, ID);
+    public void joinGame(String authToken, String playerColor, int id) {
+        String reqBody = String.format("{ \"playerColor\":\"%s\", \"gameID\": %d }", playerColor, id);
         makeRequest("PUT", "/game", reqBody, authToken, null);
     }
 
     public AuthData doPost(String path, String authToken, String... args) {
-        String reqBody;
-        switch (path) {
-            case "/session":
-                reqBody = String.format("{ \"username\":\"%s\", \"password\":\"%s\" }", args[0], args[1]);
-                break;
-            case "/user":
-                reqBody = String.format("\t{ \"username\":\"%s\", \"password\":\"%s\", \"email\":\"%s\" }", args[0], args[1], args[2]);
-                break;
-            case "/game":
-                reqBody = String.format("{ \"gameName\":\"%s\" }", args[0]);
-                break;
-            default:
-                reqBody = null;
-        }
+        String reqBody = switch (path) {
+            case "/session" -> String.format("{ \"username\":\"%s\", \"password\":\"%s\" }", args[0], args[1]);
+            case "/user" ->
+                    String.format("\t{ \"username\":\"%s\", \"password\":\"%s\", \"email\":\"%s\" }", args[0], args[1], args[2]);
+            case "/game" -> String.format("{ \"gameName\":\"%s\" }", args[0]);
+            default -> null;
+        };
         return makeRequest("POST", path, reqBody, authToken, AuthData.class);
     }
 
