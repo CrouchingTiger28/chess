@@ -1,15 +1,15 @@
 package client;
 
-import dataaccess.AuthAccess;
+import dataaccess.*;
 import dataaccess.DataAccessException;
-import dataaccess.UserAccess;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 
 public class ServerFacadeTests {
@@ -37,6 +37,11 @@ public class ServerFacadeTests {
         server.stop();
     }
 
+    @BeforeEach
+    void setup() {
+        serverFacade.clearDatabase();
+    }
+
     @AfterEach
     void tearDown() {
         System.setOut(originalOut);
@@ -59,7 +64,7 @@ public class ServerFacadeTests {
 
     @Test
     @Order(2)
-    public void failedRegisterTest() throws DataAccessException, SQLException {
+    public void failedRegisterTest() {
         serverFacade.register(TEST_USER);
         UserData user = new UserData("TestUsername", "NewPassword", "new@Email");
         System.setOut(new PrintStream(outContent));
@@ -81,7 +86,7 @@ public class ServerFacadeTests {
 
     @Test
     @Order(4)
-    public void failedLogoutTest() throws DataAccessException, SQLException {
+    public void failedLogoutTest() {
         System.setOut(new PrintStream(outContent));
 
         serverFacade.logout("String");
@@ -101,7 +106,7 @@ public class ServerFacadeTests {
 
     @Test
     @Order(6)
-    public void failedLoginTest() throws DataAccessException, SQLException {
+    public void failedLoginTest() {
         String authToken = serverFacade.register(TEST_USER);
         serverFacade.logout(authToken);
         UserData user = new UserData("TestUsername", "NewPassword", "new@Email");
@@ -117,7 +122,70 @@ public class ServerFacadeTests {
 
     @Test
     @Order(7)
+    public void succeedListGameTest() {
+        String authToken = serverFacade.register(TEST_USER);
+        GameList list = serverFacade.listGames(authToken);
+
+        Assertions.assertEquals(new GameList(new ArrayList<>()), list);
+    }
+
+    @Test
+    @Order(8)
+    public void failedListGameTest() {
+        serverFacade.register(TEST_USER);
+
+        System.setOut(new PrintStream(outContent));
+
+        serverFacade.listGames("authToken");
+
+        String output = outContent.toString();
+
+        Assertions.assertEquals("Please log in to see game list.\n", output);
+    }
+
+    @Test
+    @Order(9)
     public void succeedCreateGameTest() {
+        String authToken = serverFacade.register(TEST_USER);
+        serverFacade.createGame(authToken, "TestGame");
+
+        GameList games = serverFacade.listGames(authToken);
+        Assertions.assertEquals("TestGame", games.games().getFirst().gameName());
+    }
+
+    @Test
+    @Order(10)
+    public void failedCreateGameTest() {
+        System.setOut(new PrintStream(outContent));
+
+        serverFacade.createGame("authToken", "Game");
+
+        String output = outContent.toString();
+
+        Assertions.assertEquals("Please log in to create a game.\n", output);
+    }
+
+    @Test
+    @Order(11)
+    public void succeedJoinGameTest() {
+        String authToken = serverFacade.register(TEST_USER);
+        serverFacade.createGame(authToken, "TestGame");
+
+        serverFacade.joinGame(authToken, "WHITE", 1);
+        GameList games = serverFacade.listGames(authToken);
+        Assertions.assertEquals(TEST_USER.username(), games.games().getFirst().whiteUsername());
+    }
+
+    @Test
+    @Order(12)
+    public void failedJoinGameTest() {
+        String authToken = serverFacade.register(TEST_USER);
+
+        System.setOut(new PrintStream(outContent));
+        serverFacade.joinGame(authToken, "WHITE", 0);
+        String output = outContent.toString();
+
+        Assertions.assertEquals("Game must exist to join it.\n", output);
 
     }
 }

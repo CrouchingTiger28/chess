@@ -78,7 +78,7 @@ public class ServerFacade {
             return comm.listGames("/game", authToken);
         } catch (RuntimeException ex) {
             if (ex.getMessage().equals("401")) {
-                System.out.println("Please log in to see game list.\n");
+                System.out.print("Please log in to see game list.\n");
             } else {
                 System.out.println("Internal server error occurred. Please come back later.");
             }
@@ -92,10 +92,10 @@ public class ServerFacade {
         } catch (RuntimeException ex) {
             switch (ex.getMessage()) {
                 case "400":
-                    System.out.println("Game name must exist to create game.\n");
+                    System.out.print("Game name must exist to create game.\n");
                     break;
                 case "401":
-                    System.out.println("Please log in to create a game.\n");
+                    System.out.print("Please log in to create a game.\n");
                     break;
                 default:
                     System.out.println("Internal server error occurred. Please come back later.");
@@ -110,10 +110,10 @@ public class ServerFacade {
         } catch (RuntimeException ex) {
             switch (ex.getMessage()) {
                 case "400":
-                    System.out.println("Game must exist to join it.\n");
+                    System.out.print("Game must exist to join it.\n");
                     break;
                 case "401":
-                    System.out.println("Please log in to join a game.\n");
+                    System.out.print("Please log in to join a game.\n");
                     break;
                 case "403":
                     System.out.printf("Oops! There's already a %s player in that game!%n%n", playerColor.toLowerCase());
