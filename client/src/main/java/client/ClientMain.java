@@ -230,7 +230,18 @@ public class ClientMain {
 
         serverFacade.joinGame(authToken, colorName, gameID);
         System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
-        drawboard(colorName);
+        drawboard(colorName, gameID);
+    }
+
+    private void observeGame() {
+        updateGameList();
+        System.out.println("What game would you like to observe?");
+        int gameNumber = repl(List.of(), gameList.games().size());
+
+        int gameID = getGameID(gameNumber);
+
+        System.out.printf("Alright, observing game %d from white's perspective...%n", gameNumber);
+        drawboard("White", gameID);
     }
 
     private boolean preloginMenuItem(int option) {
@@ -283,6 +294,7 @@ public class ClientMain {
                 break;
             case 6:
                 //observe game
+                observeGame();
                 break;
             default:
                 System.out.printf("%d %s", option, "is not a valid input. Select help (1) for additional assistance.\n");
@@ -301,11 +313,11 @@ public class ClientMain {
         }
     }
 
-    private void drawboard(String color) {
+    private void drawboard(String color, int gameID) {
         if (color.equalsIgnoreCase("WHITE")) {
-            boardPen.drawWhite();
+            boardPen.drawWhite(gameID, gameList);
         } else {
-            boardPen.drawBlack();
+            boardPen.drawBlack(gameID, gameList);
         }
     }
 }
