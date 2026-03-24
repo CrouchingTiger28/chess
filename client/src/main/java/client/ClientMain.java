@@ -3,6 +3,7 @@ package client;
 import chess.*;
 import model.GameData;
 import model.GameList;
+import model.UserData;
 import ui.DrawBoard;
 
 import java.util.InputMismatchException;
@@ -82,10 +83,26 @@ public class ClientMain {
         }
     }
 
+    private void login() {
+        scanner.nextLine();
+        String username = "something went wrong";
+        String password = "something else went wrong";
+
+        while (authToken == null) {
+            System.out.print("Please input username: \n");
+            username = scanner.nextLine();
+
+            System.out.print("Please input password: \n");
+            password = scanner.nextLine();
+
+            authToken = serverFacade.login(new UserData(username, password, null));
+        }
+    }
+
     private boolean preloginMenuItem(int option) {
         switch (option) {
             case 1:
-                //login
+                login();
                 loggedIn = true;
                 return true;
             case 2:
@@ -121,11 +138,9 @@ public class ClientMain {
                 break;
             case 5:
                 //play game
-                joinGame();
                 break;
             case 6:
                 //observe game
-                watchGame();
                 break;
             default:
                 System.out.printf("%d %s", option, "is not a valid input. Select help (1) for additional assistance.\n");
@@ -142,74 +157,6 @@ public class ClientMain {
             blackPlayer = (game.blackUsername() == null) ? "none" : game.blackUsername();
             System.out.printf("%d: %s. %s: %s, %s: %s%n%n", i+1, game.gameName(), "White Player", game.whiteUsername(), "Black Player", game.blackUsername());
         }
-    }
-
-    private boolean watchGame() {
-        Scanner scanner = new Scanner(System.in);
-        int input = 0;
-        boolean tryJoin = true;
-        int gameID = 0;
-
-        while (tryJoin) {
-            try {
-                input = scanner.nextInt();
-
-                if (input == 0) {
-                    tryJoin = false;
-                }
-
-                gameID = getGameID(input);
-                if (gameID > 0) {
-                    tryJoin = false;
-                }
-            } catch (InputMismatchException ex) {
-                System.out.println("Invalid input. Please try again.\n Return to previous menu by pressing 0.\n");
-                scanner.next();
-            }
-        }
-        if (input == 0) {
-            return false;
-        } else {
-            boardPen.drawWhite();
-            return true;
-        }
-    }
-
-    private boolean joinGame() {
-        Scanner scanner = new Scanner(System.in);
-        int input;
-        boolean joinID = true;
-        boolean joinColor = true;
-        int gameID = 0;
-
-        while (joinColor) {
-            try {
-                input = scanner.nextInt();
-
-                if (joinID) {
-                    gameID = getGameID(input);
-                    if (gameID > 0) {
-                        joinID = false;
-                    }
-                }
-
-                if (input == 1) {
-                    //white
-                    joinColor = false;
-                    boardPen.drawWhite();
-                } else if (input == 2) {
-                    //black
-                    joinColor = false;
-                    boardPen.drawBlack();
-                } else {
-                    System.out.printf("%d %s", input, "is not a valid input.\n");
-                }
-            } catch (InputMismatchException ex) {
-                System.out.println("Invalid input. Please try again.\n");
-                scanner.next();
-            }
-        }
-        return true;
     }
 
     private void updateGameList() {
