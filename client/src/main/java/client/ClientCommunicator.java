@@ -26,8 +26,16 @@ public class ClientCommunicator {
 
     }
 
-    public AuthData doPost(String path, String username, String password) {
-        String reqBody = String.format("{ \"username\":\"%s\", \"password\":\"%s\" }", username, password);
+    public AuthData doPost(String path, String... args) {
+        String reqBody;
+        switch (path) {
+            case "/session":
+                reqBody = String.format("{ \"username\":\"%s\", \"password\":\"%s\" }", args[0], args[1]);
+            case "/user":
+                reqBody = String.format("\t{ \"username\":\"%s\", \"password\":\"%s\", \"email\":\"%s\" }", args[0], args[1], args[2]);
+            default:
+                reqBody = null;
+        }
         return makeRequest("POST", path, reqBody, null, AuthData.class);
     }
 

@@ -8,6 +8,7 @@ import ui.DrawBoard;
 
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class ClientMain {
@@ -83,6 +84,36 @@ public class ClientMain {
         }
     }
 
+    private void register() {
+        scanner.nextLine();
+        String username;
+        String password1 = null;
+        String password2 = "other null";
+        String email;
+
+        while (authToken == null) {
+            System.out.print("Please create a username: \n");
+            username = scanner.nextLine();
+
+            while (!Objects.equals(password1, password2)) {
+                System.out.print("Please create a password: \n");
+                password1 = scanner.nextLine();
+
+                System.out.print("Please repeat your password: \n");
+                password2 = scanner.nextLine();
+
+                if (!Objects.equals(password1, password2)) {
+                    System.out.println("Passwords don't match!");
+                }
+            }
+
+            System.out.print("Please input email: \n");
+            email = scanner.nextLine();
+
+            authToken = serverFacade.register(new UserData(username, password1, email));
+        }
+    }
+
     private void login() {
         scanner.nextLine();
         String username = "something went wrong";
@@ -107,6 +138,7 @@ public class ClientMain {
                 return true;
             case 2:
                 //register
+                register();
                 loggedIn = true;
                 return true;
             case 3:
