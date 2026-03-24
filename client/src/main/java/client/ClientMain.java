@@ -16,12 +16,13 @@ public class ClientMain {
     private String authToken = null;
     private final ui.DrawBoard boardPen = new ui.DrawBoard();
     private GameList gameList = null;
-    private static final ServerFacade SERVER_FACADE = new ServerFacade();
+    private static ServerFacade serverFacade;
     private final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
+        serverFacade = new ServerFacade(Integer.parseInt(args[0]));
         ClientMain self = new ClientMain();
         self.menu();
     }
@@ -90,7 +91,7 @@ public class ClientMain {
         response = scanner.next();
 
         if (affirmative.contains(response)) {
-            SERVER_FACADE.clearDatabase();
+            serverFacade.clearDatabase();
             System.out.println("Clearing database...");
             authToken = null;
         }
@@ -122,7 +123,7 @@ public class ClientMain {
         System.out.print("Please input email: \n");
         email = scanner.nextLine();
 
-        authToken = SERVER_FACADE.register(new UserData(username, password1, email));
+        authToken = serverFacade.register(new UserData(username, password1, email));
 
         if (authToken != null) {
             System.out.println("Registering you...\n");
@@ -145,7 +146,7 @@ public class ClientMain {
         System.out.print("Please input password: \n");
         password = scanner.nextLine();
 
-        authToken = SERVER_FACADE.login(new UserData(username, password, null));
+        authToken = serverFacade.login(new UserData(username, password, null));
 
         if (authToken != null) {
             System.out.println("Logging you in...\n");
@@ -167,7 +168,7 @@ public class ClientMain {
             response = scanner.next();
 
             if (affirmative.contains(response)) {
-                SERVER_FACADE.logout(authToken);
+                serverFacade.logout(authToken);
                 authToken = null;
             } else if (negative.contains(response)) {
                 return false;
@@ -203,7 +204,7 @@ public class ClientMain {
         System.out.print("Game Name: \n");
         gameName = scanner.nextLine();
 
-        SERVER_FACADE.createGame(authToken, gameName);
+        serverFacade.createGame(authToken, gameName);
 
         updateGameList();
 
@@ -240,7 +241,7 @@ public class ClientMain {
 
         int gameID = (game != null)? game.gameID() : null;
 
-        if (SERVER_FACADE.joinGame(authToken, colorName, gameID)) {
+        if (serverFacade.joinGame(authToken, colorName, gameID)) {
             System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
             drawBoard(colorName, game);
         }
@@ -324,7 +325,7 @@ public class ClientMain {
     }
 
     private void updateGameList() {
-        gameList = SERVER_FACADE.listGames(authToken);
+        gameList = serverFacade.listGames(authToken);
     }
 
     private GameData getGame(int gameNumber) {

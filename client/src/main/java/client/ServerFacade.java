@@ -4,11 +4,15 @@ import model.*;
 
 
 public class ServerFacade {
-    private static final ClientCommunicator COMM = new ClientCommunicator();
+    private static ClientCommunicator comm;
+
+    public ServerFacade(int port) {
+        comm = new ClientCommunicator(port);
+    }
 
     public void clearDatabase() {
         try {
-            COMM.doDelete("/db", null);
+            comm.doDelete("/db", null);
         } catch (RuntimeException ex) {
             System.out.println("Internal server error. Please try again later.");
         }
@@ -16,7 +20,7 @@ public class ServerFacade {
 
     public String register(UserData user) {
         try {
-            AuthData newAuth = COMM.doPost("/user", null, user.username(), user.password(), user.email());
+            AuthData newAuth = comm.doPost("/user", null, user.username(), user.password(), user.email());
             if (newAuth != null) {
                 return newAuth.authToken();
             } else {
@@ -39,7 +43,7 @@ public class ServerFacade {
 
     public String login(UserData user) {
         try {
-            AuthData newAuth = COMM.doPost("/session", null, user.username(), user.password());
+            AuthData newAuth = comm.doPost("/session", null, user.username(), user.password());
             return newAuth.authToken();
         } catch (RuntimeException ex) {
             switch (ex.getMessage()) {
@@ -58,7 +62,7 @@ public class ServerFacade {
 
     public void logout(String authToken) {
         try {
-            COMM.doDelete("/session", authToken);
+            comm.doDelete("/session", authToken);
         } catch (RuntimeException ex) {
             if (ex.getMessage().equals("401")) {
                 System.out.println("Must be logged in to log out.\n");
@@ -71,7 +75,7 @@ public class ServerFacade {
     public GameList listGames(String authToken) {
         //return a GameList of all the games. Exactly what it says on the tin.
         try {
-            return COMM.listGames("/game", authToken);
+            return comm.listGames("/game", authToken);
         } catch (RuntimeException ex) {
             if (ex.getMessage().equals("401")) {
                 System.out.println("Please log in to see game list.\n");
@@ -84,7 +88,7 @@ public class ServerFacade {
 
     public void createGame(String authToken, String gameName) {
         try {
-            COMM.doPost("/game", authToken, gameName);
+            comm.doPost("/game", authToken, gameName);
         } catch (RuntimeException ex) {
             switch (ex.getMessage()) {
                 case "400":
@@ -101,7 +105,7 @@ public class ServerFacade {
 
     public boolean joinGame(String authToken, String playerColor, int gameID) {
         try {
-            COMM.joinGame(authToken, playerColor, gameID);
+            comm.joinGame(authToken, playerColor, gameID);
             return true;
         } catch (RuntimeException ex) {
             switch (ex.getMessage()) {

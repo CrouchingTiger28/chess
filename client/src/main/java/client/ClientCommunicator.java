@@ -12,11 +12,11 @@ import java.net.http.*;
 
 public class ClientCommunicator {
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String serverURL = "http://localhost:8080";
+    private static String serverURL = "http://localhost:";
     private final Gson gson = new Gson();
 
-    public ClientCommunicator() {
-
+    public ClientCommunicator(int port) {
+        serverURL += port;
     }
 
     public void joinGame(String authToken, String playerColor, int id) {
