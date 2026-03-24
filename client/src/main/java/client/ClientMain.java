@@ -135,8 +135,8 @@ public class ClientMain {
 
     private boolean login() {
         scanner.nextLine();
-        String username = "something went wrong";
-        String password = "something else went wrong";
+        String username;
+        String password;
 
 
         System.out.print("Please input username: \n");
@@ -196,7 +196,7 @@ public class ClientMain {
 
     private void createGame() {
         scanner.nextLine();
-        String gameName = "something went wrong";
+        String gameName;
         GameData myGame = null;
 
 
@@ -264,28 +264,33 @@ public class ClientMain {
     }
 
     private boolean preloginMenuItem(int option) {
-        switch (option) {
-            case 1:
+        return switch (option) {
+            case 1 -> {
                 loggedIn = login();
-                return true;
-            case 2:
+                yield true;
+            }
+            case 2 -> {
                 //register
                 loggedIn = register();
-                return true;
-            case 3:
+                yield true;
+            }
+            case 3 -> {
                 printHelp();
-                return true;
-            case 4:
+                yield true;
+            }
+            case 4 ->
                 //quit
-                return false;
-            case 5:
+                    false;
+            case 5 -> {
                 //clear
                 clear();
-                return true;
-            default:
+                yield true;
+            }
+            default -> {
                 System.out.printf("%d %s", option, "is not a valid input. Select help (3) for additional assistance.\n");
-                return true;
-        }
+                yield true;
+            }
+        };
     }
 
     private void postloginMenuItem(int option) {

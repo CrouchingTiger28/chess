@@ -11,13 +11,12 @@ import java.util.List;
 
 public class DrawBoard {
 
-    private PrintStream out = new PrintStream(System.out, true);
+    private final PrintStream out = new PrintStream(System.out, true);
     public DrawBoard() {
 
     }
 
     public void drawWhite(GameData game) {
-        System.out.println("Drawing board from white perspective.");
         List<String> columns = List.of("a", "b", "c", "d", "e", "f", "g", "h");
         borderText();
 
@@ -54,7 +53,6 @@ public class DrawBoard {
     }
 
     public void drawBlack(GameData game) {
-        System.out.println("Drawing board from black perspective.");
         List<String> columns = List.of("h", "g", "f", "e", "d", "c", "b", "a");
         borderText();
 

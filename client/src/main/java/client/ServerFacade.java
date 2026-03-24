@@ -44,10 +44,10 @@ public class ServerFacade {
         } catch (RuntimeException ex) {
             switch (ex.getMessage()) {
                 case "400":
-                    System.out.println("Username and Password field need to be filled");
+                    System.out.println("Username and Password field need to be filled.");
                     break;
                 case "401":
-                    System.out.println("Invalid Username or Password.\n");
+                    System.out.println("Invalid Username or Password. If you don't have an account, register for a new one.\n");
                     break;
                 default:
                     System.out.println("Internal server error. Please try again later.");
