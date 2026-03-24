@@ -25,7 +25,6 @@ public class ClientMain {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
         ClientMain self = new ClientMain();
-        self.updateGameList();
         self.menu();
     }
 
@@ -45,7 +44,7 @@ public class ClientMain {
                     return input;
                 }
             } catch (InputMismatchException ex) {
-                System.out.println("Invalid input. Please try again.\n Select Help for more information.\n");
+                System.out.println("Invalid input. Please try again.\nSelect Help for more information.\n");
                 scanner.next();
             }
         }
@@ -59,7 +58,7 @@ public class ClientMain {
         while (true) {
 
             if (!loggedIn) {
-                firstChoice = repl(List.of("login", "register", "help", "quit"), 4);
+                firstChoice = repl(List.of("login", "register", "help", "quit", "clear"), 5);
                 if (!preloginMenuItem(firstChoice)) {
                     break;
                 }
@@ -81,6 +80,21 @@ public class ClientMain {
             System.out.println(preLoginHelp);
         } else {
             System.out.println(postLoginHelp);
+        }
+    }
+
+    private void clear() {
+        scanner.nextLine();
+        String response;
+        List<String> affirmative = List.of("yes", "YES", "Yes", "y", "Y");
+
+        System.out.print("Are you sure you want to clear the database? (yes/no)\n");
+        response = scanner.next();
+
+        if (affirmative.contains(response)) {
+            serverFacade.clearDatabase();
+            System.out.println("Clearing database...");
+            authToken = null;
         }
     }
 
@@ -111,6 +125,10 @@ public class ClientMain {
             email = scanner.nextLine();
 
             authToken = serverFacade.register(new UserData(username, password1, email));
+
+            if (authToken != null) {
+                System.out.println("Registering you...\n");
+            }
         }
     }
 
@@ -127,6 +145,10 @@ public class ClientMain {
             password = scanner.nextLine();
 
             authToken = serverFacade.login(new UserData(username, password, null));
+
+            if (authToken != null) {
+                System.out.println("Logging you in...\n");
+            }
         }
     }
 
@@ -146,9 +168,54 @@ public class ClientMain {
             } else if (negative.contains(response)) {
                 return false;
             }
-
         }
+        System.out.println("Logging you out...\n");
         return true;
+    }
+
+    private void listGames() {
+        updateGameList();
+        if (gameList == null || gameList.games().isEmpty()) {
+            System.out.println("There aren't any games right now. Create a new one by selecting 'create game' (3).");
+        } else {
+            String whitePlayer;
+            String blackPlayer;
+            for (int i = 0; i < gameList.games().size(); i++) {
+                GameData game = gameList.games().get(i);
+                whitePlayer = (game.whiteUsername() == null) ? "none" : game.whiteUsername();
+                blackPlayer = (game.blackUsername() == null) ? "none" : game.blackUsername();
+                System.out.printf("%d: %s. %s: %s, %s: %s%n", i + 1, game.gameName(), "White Player", whitePlayer, "Black Player", blackPlayer);
+            }
+            System.out.println();
+        }
+    }
+
+    private void createGame() {
+        scanner.nextLine();
+        String gameName = "something went wrong";
+        GameData myGame = null;
+
+
+        System.out.print("Game Name: \n");
+        gameName = scanner.nextLine();
+
+        serverFacade.createGame(authToken, gameName);
+
+        updateGameList();
+
+        for (GameData game : gameList.games()) {
+            if (gameName.equals(game.gameName())) {
+                myGame = game;
+                break;
+            }
+        }
+
+        if (myGame != null) {
+            int index = gameList.games().indexOf(myGame);
+            System.out.println("Creating game...");
+            System.out.printf("Your game, %s, is number %d on the list!%n%n", gameName, index+1);
+        }
+
     }
 
     private boolean preloginMenuItem(int option) {
@@ -168,6 +235,10 @@ public class ClientMain {
             case 4:
                 //quit
                 return false;
+            case 5:
+                //clear
+                clear();
+                return true;
             default:
                 System.out.printf("%d %s", option, "is not a valid input. Select help (3) for additional assistance.\n");
                 return true;
@@ -185,6 +256,7 @@ public class ClientMain {
                 break;
             case 3:
                 //create game
+                createGame();
                 break;
             case 4:
                 //list games
@@ -201,20 +273,8 @@ public class ClientMain {
         }
     }
 
-    private void listGames() {
-        updateGameList();
-        String whitePlayer;
-        String blackPlayer;
-        for (int i = 0; i < gameList.games().size(); i ++) {
-            GameData game = gameList.games().get(i);
-            whitePlayer = (game.whiteUsername() == null) ? "none" : game.whiteUsername();
-            blackPlayer = (game.blackUsername() == null) ? "none" : game.blackUsername();
-            System.out.printf("%d: %s. %s: %s, %s: %s%n%n", i+1, game.gameName(), "White Player", game.whiteUsername(), "Black Player", game.blackUsername());
-        }
-    }
-
     private void updateGameList() {
-        gameList = serverFacade.listGames();
+        gameList = serverFacade.listGames(authToken);
     }
 
     private int getGameID(int gameNumber) {

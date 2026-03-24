@@ -2,35 +2,105 @@ package client;
 
 import model.*;
 
+
 public class ServerFacade {
     private static ClientCommunicator comm = new ClientCommunicator();
 
+    public void clearDatabase() {
+        try {
+            comm.doDelete("/db", null);
+        } catch (RuntimeException ex) {
+            System.out.println("Internal server error. Please try again later.");
+        }
+    }
+
     public String register(UserData user) {
-        AuthData newAuth = comm.doPost("/user", null, user.username(), user.password(), user.email());
-        if (newAuth != null) {
-            return newAuth.authToken();
-        } else {
-            throw new RuntimeException("something went wrong :(");
+        try {
+            AuthData newAuth = comm.doPost("/user", null, user.username(), user.password(), user.email());
+            if (newAuth != null) {
+                return newAuth.authToken();
+            } else {
+                throw new RuntimeException("something went wrong :(");
+            }
+        } catch (RuntimeException ex) {
+            switch (ex.getMessage()) {
+                case "400":
+                    System.out.println("Username and Password field need to be filled");
+                    break;
+                case "403":
+                    System.out.println("Username already taken.\n");
+                    break;
+                default:
+                    System.out.println("Internal server error. Please try again later.");
+            }
+            return null;
         }
     }
 
     public String login(UserData user) {
-        AuthData newAuth = comm.doPost("/session", null, user.username(), user.password());
-        if (newAuth != null) {
+        try {
+            AuthData newAuth = comm.doPost("/session", null, user.username(), user.password());
             return newAuth.authToken();
-        } else {
-            throw new RuntimeException("something went wrong :(");
+        } catch (RuntimeException ex) {
+            switch (ex.getMessage()) {
+                case "400":
+                    System.out.println("Username and Password field need to be filled");
+                    break;
+                case "401":
+                    System.out.println("Invalid Username or Password.\n");
+                    break;
+                default:
+                    System.out.println("Internal server error. Please try again later.");
+            }
+            return null;
         }
     }
 
     public void logout(String authToken) {
-        comm.doDelete("/session", authToken);
+        try {
+            comm.doDelete("/session", authToken);
+        } catch (RuntimeException ex) {
+            switch (ex.getMessage()) {
+                case "401":
+                    System.out.println("Must be logged in to log out.\n");
+                    break;
+                default:
+                    System.out.println("Internal server error occurred. Please come back later.");
+            }
+        }
     }
 
-    public GameList listGames() {
+    public GameList listGames(String authToken) {
         //return a GameList of all the games. Exactly what it says on the tin.
-        GameList list = comm.listGames();
-        return list;
+        try {
+            return comm.listGames("/game", authToken);
+        } catch (RuntimeException ex) {
+            switch (ex.getMessage()) {
+                case "401":
+                    System.out.println("Please log in to see game list.\n");
+                    break;
+                default:
+                    System.out.println("Internal server error occurred. Please come back later.");
+            }
+            return null;
+        }
+    }
+
+    public void createGame(String authToken, String gameName) {
+        try {
+            comm.doPost("/game", authToken, gameName);
+        } catch (RuntimeException ex) {
+            switch (ex.getMessage()) {
+                case "400":
+                    System.out.println("Game name must exist to create game.");
+                    break;
+                case "401":
+                    System.out.println("Please log in to create a game.\n");
+                    break;
+                default:
+                    System.out.println("Internal server error occurred. Please come back later.");
+            }
+        }
     }
 
 }

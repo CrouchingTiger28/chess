@@ -26,7 +26,7 @@ public class ClientCommunicator {
 
     }
 
-    public AuthData doPost(String path, String Authtoken, String... args) {
+    public AuthData doPost(String path, String authToken, String... args) {
         String reqBody;
         switch (path) {
             case "/session":
@@ -35,19 +35,21 @@ public class ClientCommunicator {
             case "/user":
                 reqBody = String.format("\t{ \"username\":\"%s\", \"password\":\"%s\", \"email\":\"%s\" }", args[0], args[1], args[2]);
                 break;
+            case "/game":
+                reqBody = String.format("{ \"gameName\":\"%s\" }", args[0]);
+                break;
             default:
                 reqBody = null;
         }
-        return makeRequest("POST", path, reqBody, null, AuthData.class);
+        return makeRequest("POST", path, reqBody, authToken, AuthData.class);
     }
 
     public void doDelete(String path, String authToken) {
         makeRequest("DELETE", path, null, authToken, null);
     }
 
-    public GameList listGames() {
-        return new GameList(new ArrayList<>(List.of(new GameData(37, null,
-                "BirdCowboy", "Our Game", new ChessGame()))));
+    public GameList listGames(String path, String authToken) {
+        return makeRequest("GET", path, null, authToken, null);
     }
 
     private <T> T makeRequest(String method, String path, String request, String authtoken, Class<T> responseClass) throws RuntimeException {
@@ -74,7 +76,7 @@ public class ClientCommunicator {
             int status = response.statusCode();
 
             if (status / 100 != 2) {
-                throw new RuntimeException("HTTP " + status + " : " + response.body());
+                throw new RuntimeException(Integer.toString(status));
             }
 
             if (responseClass == null) {
