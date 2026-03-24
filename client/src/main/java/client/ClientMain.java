@@ -22,7 +22,7 @@ public class ClientMain {
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
-        serverFacade = new ServerFacade(Integer.parseInt(args[0]));
+        serverFacade = new ServerFacade(8080);
         ClientMain self = new ClientMain();
         self.menu();
     }
