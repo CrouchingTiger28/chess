@@ -17,8 +17,8 @@ public class ServerFacadeTests {
     private static Server server;
     private static ServerFacade serverFacade;
     private final static UserData TEST_USER = new UserData("TestUsername", "TestPassword", "Test@Email");
-    private final static UserAccess userAccess = new UserAccess();
-    private final static AuthAccess authAccess = new AuthAccess();
+    private final static UserAccess USER_ACCESS = new UserAccess();
+    private final static AuthAccess AUTH_ACCESS = new AuthAccess();
     private final PrintStream originalOut = System.out;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -58,7 +58,7 @@ public class ServerFacadeTests {
     public void succeedRegisterTest() throws DataAccessException, SQLException {
         serverFacade.register(TEST_USER);
 
-        UserData user = userAccess.getUser(TEST_USER.username());
+        UserData user = USER_ACCESS.getUser(TEST_USER.username());
         Assertions.assertEquals(TEST_USER.username(), user.username());
     }
 
@@ -81,7 +81,7 @@ public class ServerFacadeTests {
         String authToken = serverFacade.register(TEST_USER);
         serverFacade.logout(authToken);
 
-        Assertions.assertNull(authAccess.getAuth(authToken));
+        Assertions.assertNull(AUTH_ACCESS.getAuth(authToken));
     }
 
     @Test
@@ -100,7 +100,7 @@ public class ServerFacadeTests {
     public void succeedLoginTest() throws DataAccessException, SQLException {
         serverFacade.register(TEST_USER);
 
-        UserData user = userAccess.getUser(TEST_USER.username());
+        UserData user = USER_ACCESS.getUser(TEST_USER.username());
         Assertions.assertEquals(TEST_USER.username(), user.username());
     }
 
@@ -116,7 +116,8 @@ public class ServerFacadeTests {
         serverFacade.login(user);
 
         String output = outContent.toString();
-        Assertions.assertEquals("Invalid Username or Password. If you don't have an account, register for a new one.\n" + System.lineSeparator(), output);
+        Assertions.assertEquals("Invalid Username or Password. " +
+                "If you don't have an account, register for a new one.\n" + System.lineSeparator(), output);
 
     }
 
