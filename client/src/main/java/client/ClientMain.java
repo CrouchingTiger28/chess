@@ -41,6 +41,8 @@ public class ClientMain {
 
                 if (0 < input && input <= numOfOptions) {
                     return input;
+                } else {
+                    System.out.printf("Invalid input. Please try again.%nInput must be a whole number between 1 and %d.%n", numOfOptions);
                 }
             } catch (InputMismatchException ex) {
                 System.out.printf("Invalid input. Please try again.%nInput must be a whole number between 1 and %d.%n", numOfOptions);
@@ -57,7 +59,7 @@ public class ClientMain {
         while (true) {
 
             if (!loggedIn) {
-                firstChoice = repl(List.of("login", "register", "help", "quit", "clear"), 5);
+                firstChoice = repl(List.of("login", "register", "help", "quit"), 4);
                 if (!preloginMenuItem(firstChoice)) {
                     break;
                 }
