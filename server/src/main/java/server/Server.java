@@ -26,6 +26,16 @@ public class Server {
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
             config.jsonMapper(new JavalinGson());
+            config.router.mount(router -> {
+                router.ws("/ws", ws -> {
+                    ws.onConnect(ctx -> {
+                        ctx.enableAutomaticPings();
+                        System.out.println("Websocket connected");
+                    });
+                    ws.onMessage(ctx -> ctx.send("WebSocket response:" + ctx.message()));
+                    ws.onClose(_ -> System.out.println("Websocket closed"));
+                });
+            });
         });
 
 
@@ -82,7 +92,9 @@ public class Server {
         javalin.stop();
     }
 
-
+    public int port() {
+        return javalin.port();
+    }
 
     private final String[] createStatements = {
             """

@@ -18,12 +18,20 @@ public class ClientMain {
     private GameList gameList = null;
     private static ServerFacade serverFacade;
     private final Scanner scanner = new Scanner(System.in);
+    private String serverUrl = "http://localhost:8080";
+
+    public ClientMain(String[] args) {
+        serverFacade = new ServerFacade(8080);
+        ws = new WebSocketFacade(serverUrl, this);
+        if (args.length == 1) {
+            serverUrl = args[0];
+        }
+    }
 
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
-        serverFacade = new ServerFacade(8080);
-        ClientMain self = new ClientMain();
+        ClientMain self = new ClientMain(args);
         self.menu();
     }
 
