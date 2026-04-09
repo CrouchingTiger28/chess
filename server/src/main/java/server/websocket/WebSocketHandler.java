@@ -37,6 +37,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (action.getCommandType()) {
                 case CommandType.CONNECT -> enter(action.getGameID(), action.getAuthToken(), ctx.session);
                 case CommandType.LEAVE -> exit(action.getGameID(), action.getAuthToken(), ctx.session);
+                case CommandType.RESIGN -> resign(action.getGameID(), action.getAuthToken(), ctx.session);
             }
         } catch (IOException | DataAccessException | SQLException ex) {
             ex.printStackTrace();
@@ -63,12 +64,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void exit(int gameID, String authToken, Session session) throws IOException, DataAccessException, SQLException  {
         AuthData authData = authAccess.getAuth(authToken);
-        GameData gameData = gameAccess.getGame(gameID);
 
         String username = authData.username();
 
         var message = String.format("%s has left the game", username);
         var notification = new Notification(Notification.Type.DEPARTURE, message);
+        connections.broadcast(session, notification, gameID);
+        connections.remove(gameID, session);
+    }
+
+    private void resign(int gameID, String authToken, Session session) throws IOException, DataAccessException, SQLException  {
+        AuthData authData = authAccess.getAuth(authToken);
+        GameData gameData = gameAccess.getGame(gameID);
+
+        String username = authData.username();
+        String winningColor = (Objects.equals(gameData.whiteUsername(), username)) ? "black" : "white";
+
+        var message = String.format("%s has resigned the game, and %s has won.", username, winningColor);
+        var notification = new Notification(Notification.Type.NOISE, message);
         connections.broadcast(session, notification, gameID);
         connections.remove(gameID, session);
     }

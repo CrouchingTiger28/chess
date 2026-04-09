@@ -5,6 +5,7 @@ import model.HandlerResponse;
 import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.json.JavalinGson;
+import server.websocket.WebSocketHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,6 +13,7 @@ import java.sql.SQLException;
 public class Server {
 
     private final Javalin javalin;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         try {
@@ -20,6 +22,7 @@ public class Server {
             System.out.println("No");
         }
         Handler handler = new Handler();
+        webSocketHandler = new WebSocketHandler();
 
 
 
@@ -28,12 +31,9 @@ public class Server {
             config.jsonMapper(new JavalinGson());
             config.router.mount(router -> {
                 router.ws("/ws", ws -> {
-                    ws.onConnect(ctx -> {
-                        ctx.enableAutomaticPings();
-                        System.out.println("Websocket connected");
-                    });
-                    ws.onMessage(ctx -> ctx.send("WebSocket response:" + ctx.message()));
-                    ws.onClose(_ -> System.out.println("Websocket closed"));
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
                 });
             });
         });

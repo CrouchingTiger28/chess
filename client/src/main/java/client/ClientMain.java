@@ -7,20 +7,20 @@ import model.UserData;
 import websocket.ResponseException;
 import websocket.messages.Notification;
 
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 public class ClientMain implements NotificationHandler{
 
     private boolean loggedIn = false;
+    private boolean inGame = false;
     private String authToken = null;
     private final ui.DrawBoard boardPen = new ui.DrawBoard();
     private GameList gameList = null;
     private static ServerFacade serverFacade;
     private final Scanner scanner = new Scanner(System.in);
     private final WebSocketFacade ws;
+    private String playerColor = null;
+    private GameData gameImPlaying = null;
 
     public ClientMain(String[] args) throws ResponseException{
         String serverUrl = "http://localhost:8080";
@@ -72,17 +72,21 @@ public class ClientMain implements NotificationHandler{
     private void menu() {
         int firstChoice;
         int secondChoice;
+        int thirdChoice;
 
         while (true) {
 
             if (!loggedIn) {
-                firstChoice = repl(List.of("login", "register", "help", "quit"), 4);
+                firstChoice = repl(List.of("login", "register", "help", "quit"), 5);
                 if (!preloginMenuItem(firstChoice)) {
                     break;
                 }
-            } else {
+            } else if (!inGame) {
                 secondChoice = repl(List.of("help", "logout", "create game", "list games", "join game", "observe game"), 6);
                 postloginMenuItem(secondChoice);
+            } else {
+                thirdChoice = repl(List.of("help", "redraw board", "leave game", "make move", "resign game", "highlight legal moves"), 6);
+                inGameMenuItem(thirdChoice);
             }
 
         }
@@ -98,11 +102,15 @@ public class ClientMain implements NotificationHandler{
         String preLoginHelp = "Select 1 to log into your account\nSelect 2 to register a new account\nSelect 3 for this help message\nSelect 4 to quit";
         String postLoginHelp = "Select 1 for this help message\nSelect 2 to log out as this user\nSelect 3 to create a new game\n" +
                 "Select 4 to list all available games\nSelect 5 to join a preexisting game\nSelect 6 to observe someone else's game";
+        String inGameHelp = "Select 1 for this help message\nSelect 2 to redraw the chess board\nSelect 3 to leave the game without resigning\n" +
+                "Select 4 to make a move\nSelect 5 to resign the game\nSelect 6 to highlight all legal moves of a specified piece";
 
         if (!loggedIn) {
             System.out.println(preLoginHelp);
-        } else {
+        } else if (!inGame) {
             System.out.println(postLoginHelp);
+        } else {
+            System.out.println(inGameHelp);
         }
     }
 
@@ -261,6 +269,7 @@ public class ClientMain implements NotificationHandler{
         int color = repl(List.of("White", "Black"), 2);
 
         String colorName = (color == 1) ? "WHITE" : "BLACK";
+        playerColor = colorName;
         GameData game = getGame(gameNumber);
 
         int gameID = (game != null)? game.gameID() : null;
@@ -268,8 +277,11 @@ public class ClientMain implements NotificationHandler{
         try {
             if (serverFacade.joinGame(authToken, colorName, gameID)) {
                 System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
-                drawBoard(colorName, game);
+                drawBoard(game, null, null);
                 ws.joinGame(authToken, gameID);
+                inGame = true;
+                playerColor = colorName.toLowerCase();
+                gameImPlaying = game;
             }
         } catch (ResponseException e) {
             throw new RuntimeException(e);
@@ -290,7 +302,44 @@ public class ClientMain implements NotificationHandler{
         GameData game = getGame(gameNumber);
 
         System.out.printf("Alright, observing game %d from white's perspective...%n", gameNumber);
-        drawBoard("White", game);
+        drawBoard(game, null, null);
+    }
+
+    private void leaveGame() {
+        try {
+            ws.leaveGame(authToken, gameImPlaying.gameID());
+            inGame = false;
+            gameImPlaying = null;
+        } catch (ResponseException e) {
+            System.out.println("Something went wrong :(");
+        }
+    }
+
+    private void resign() {
+        try {
+            ws.resign(authToken, gameImPlaying.gameID());
+            String opponentColor = (playerColor.equalsIgnoreCase("white")) ? "black" : "white";
+            System.out.printf("You have resigned this game, and %s wins.%n", opponentColor);
+        } catch (ResponseException e) {
+            System.out.println("Something went wrong :(");
+        }
+    }
+
+    private void highlightLegalMoves() {
+        System.out.println("Enter the row of the piece you wish to view the legal moves of.");
+        int row = repl(List.of(), 8);
+
+        System.out.println("Enter the column (indexed with a=1, h=8) of the piece you wish to view the legal moves of.");
+        int col = repl(List.of(), 8);
+
+        Collection<ChessMove> validMoves = gameImPlaying.game().validMoves(new ChessPosition(row, col));
+        ArrayList<ChessPosition> endPositions = new ArrayList<>();
+        ChessPosition origin = null;
+        for (ChessMove move : validMoves) {
+            endPositions.add(move.getEndPosition());
+            origin = move.getStartPosition();
+        }
+        drawBoard(gameImPlaying, endPositions, origin);
     }
 
     private boolean preloginMenuItem(int option) {
@@ -353,6 +402,31 @@ public class ClientMain implements NotificationHandler{
         }
     }
 
+    private void inGameMenuItem(int option) {
+        switch (option) {
+            case 1:
+                printHelp();
+                break;
+            case 2:
+                drawBoard(gameImPlaying, null, null);
+                break;
+            case 3:
+                leaveGame();
+                break;
+            case 4:
+                //make move
+                break;
+            case 5:
+                resign();
+                break;
+            case 6:
+                highlightLegalMoves();
+                break;
+            default:
+                System.out.printf("%d is not a valid input. Select help (1) for additional assistance.%n", option);
+        }
+    }
+
     private void updateGameList() {
         gameList = serverFacade.listGames(authToken);
     }
@@ -365,11 +439,10 @@ public class ClientMain implements NotificationHandler{
         }
     }
 
-    private void drawBoard(String color, GameData game) {
-        if (color.equalsIgnoreCase("WHITE")) {
-            boardPen.drawWhite(game);
-        } else {
-            boardPen.drawBlack(game);
-        }
+    private void drawBoard(GameData game, ArrayList<ChessPosition> squares, ChessPosition origin) {
+        String color = (playerColor == null) ? "white" : playerColor;
+        boardPen.draw(game, color, squares, origin);
     }
+
+
 }

@@ -1,12 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.GameData;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,16 +16,16 @@ public class DrawBoard {
 
     }
 
-    public void draw(GameData game, String colorPerspective) {
-        List<String> columns = (Objects.equals(colorPerspective, "White")) ?
+    public void draw(GameData game, String colorPerspective, ArrayList<ChessPosition> squares, ChessPosition origin) {
+        List<String> columns = (colorPerspective.equalsIgnoreCase("white")) ?
                 List.of("a", "b", "c", "d", "e", "f", "g", "h") : List.of("h", "g", "f", "e", "d", "c", "b", "a");
         borderText();
 
         headerAndFooter(columns);
 
         ChessBoard board = game.game().getBoard();
-        boolean reverse = !Objects.equals(colorPerspective, "White");
-        drawBoardBlock(board, reverse);
+        boolean reverse = !colorPerspective.equalsIgnoreCase("white");
+        drawBoardBlock(board, reverse, squares, origin);
 
         headerAndFooter(columns);
 
@@ -34,7 +33,8 @@ public class DrawBoard {
         out.print(EscapeSequences.RESET_TEXT_COLOR);
     }
 
-    public void drawBoardBlock(ChessBoard board, Boolean reverse) {
+    public void drawBoardBlock(ChessBoard board, Boolean reverse, ArrayList<ChessPosition> squares, ChessPosition origin) {
+
         for (int y = 8; y >= 1; y--) {
             borderText();
             int row = (reverse) ? 9-y : y;
@@ -46,8 +46,18 @@ public class DrawBoard {
 
                 if ((column + row) % 2 != 1) {
                     out.print(EscapeSequences.SET_BG_COLOR_DARK_BROWN);
+                    if (squares != null && squares.contains(new ChessPosition(row, column))) {
+                        out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                    } else if (origin != null && origin.equals(new ChessPosition(row, column))) {
+                        out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                    }
                 } else {
                     out.print(EscapeSequences.SET_BG_COLOR_PALE_BROWN);
+                    if (squares != null && squares.contains(new ChessPosition(row, column))) {
+                        out.print(EscapeSequences.SET_BG_COLOR_GREEN);
+                    }   else if (origin != null && origin.equals(new ChessPosition(row, column))) {
+                        out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                    }
                 }
                 ChessPiece piece = board.getPiece(new ChessPosition(row, column));
                 System.out.print(getSymbol(piece));
@@ -59,14 +69,6 @@ public class DrawBoard {
             out.print(EscapeSequences.RESET_BG_COLOR);
             System.out.println();
         }
-    }
-
-    public void drawWhite(GameData game) {
-        draw(game, "White");
-    }
-
-    public void drawBlack(GameData game) {
-        draw(game, "Black");
     }
 
     private void borderText() {
