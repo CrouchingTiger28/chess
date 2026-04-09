@@ -4,14 +4,15 @@ import chess.*;
 import model.GameData;
 import model.GameList;
 import model.UserData;
-import client.WebSocketFacade;
+import websocket.ResponseException;
+import websocket.messages.Notification;
 
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class ClientMain {
+public class ClientMain implements NotificationHandler{
 
     private boolean loggedIn = false;
     private String authToken = null;
@@ -19,9 +20,10 @@ public class ClientMain {
     private GameList gameList = null;
     private static ServerFacade serverFacade;
     private final Scanner scanner = new Scanner(System.in);
-    private String serverUrl = "http://localhost:8080";
+    private final WebSocketFacade ws;
 
-    public ClientMain(String[] args) {
+    public ClientMain(String[] args) throws ResponseException{
+        String serverUrl = "http://localhost:8080";
         serverFacade = new ServerFacade(8080, serverUrl);
         if (args.length == 1) {
             serverUrl = args[0];
@@ -32,7 +34,13 @@ public class ClientMain {
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
-        ClientMain self = new ClientMain(args);
+        ClientMain self = null;
+        try {
+            self = new ClientMain(args);
+        } catch (ResponseException e) {
+            System.out.println("Couldn't connect to server :(");
+            return;
+        }
         self.menu();
     }
 
@@ -80,6 +88,10 @@ public class ClientMain {
         }
         scanner.close();
 
+    }
+
+    public void notify(Notification notification) {
+        System.out.println(notification.message());
     }
 
     private void printHelp() {
@@ -253,9 +265,14 @@ public class ClientMain {
 
         int gameID = (game != null)? game.gameID() : null;
 
-        if (serverFacade.joinGame(authToken, colorName, gameID)) {
-            System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
-            drawBoard(colorName, game);
+        try {
+            if (serverFacade.joinGame(authToken, colorName, gameID)) {
+                System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
+                drawBoard(colorName, game);
+                ws.joinGame(authToken, gameID);
+            }
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
         }
     }
 

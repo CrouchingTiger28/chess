@@ -1,3 +1,5 @@
+package client;
+
 import client.ClientMain;
 import client.NotificationHandler;
 import client.ServerFacade;
