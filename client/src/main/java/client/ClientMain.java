@@ -4,6 +4,7 @@ import chess.*;
 import model.GameData;
 import model.GameList;
 import model.UserData;
+import client.WebSocketFacade;
 
 import java.util.InputMismatchException;
 import java.util.List;
@@ -21,11 +22,11 @@ public class ClientMain {
     private String serverUrl = "http://localhost:8080";
 
     public ClientMain(String[] args) {
-        serverFacade = new ServerFacade(8080);
-        ws = new WebSocketFacade(serverUrl, this);
+        serverFacade = new ServerFacade(8080, serverUrl);
         if (args.length == 1) {
             serverUrl = args[0];
         }
+        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public static void main(String[] args) {
@@ -82,8 +83,9 @@ public class ClientMain {
     }
 
     private void printHelp() {
-        String preLoginHelp = "This is the help string before logging in.";
-        String postLoginHelp = "This is the help string after logging in.";
+        String preLoginHelp = "Select 1 to log into your account\nSelect 2 to register a new account\nSelect 3 for this help message\nSelect 4 to quit";
+        String postLoginHelp = "Select 1 for this help message\nSelect 2 to log out as this user\nSelect 3 to create a new game\n" +
+                "Select 4 to list all available games\nSelect 5 to join a preexisting game\nSelect 6 to observe someone else's game";
 
         if (!loggedIn) {
             System.out.println(preLoginHelp);

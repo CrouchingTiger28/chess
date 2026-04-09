@@ -29,7 +29,7 @@ public class ServerFacadeTests {
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
 
-        serverFacade = new ServerFacade(port);
+        serverFacade = new ServerFacade(port, "http://localhost:8080");
     }
 
     @AfterAll

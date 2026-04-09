@@ -6,7 +6,7 @@ import model.*;
 public class ServerFacade {
     private static ClientCommunicator comm;
 
-    public ServerFacade(int port) {
+    public ServerFacade(int port, String serverUrl) {
         comm = new ClientCommunicator(port);
     }
 
