@@ -353,6 +353,10 @@ public class ClientMain implements NotificationHandler{
         int col = repl(List.of(), 8);
 
         Collection<ChessMove> validMoves = gameImPlaying.game().validMoves(new ChessPosition(row, col));
+        if (validMoves == null) {
+            System.out.println("This is an empty square. It can't move.");
+            return;
+        }
         ArrayList<ChessPosition> endPositions = new ArrayList<>();
         ChessPosition origin = null;
         for (ChessMove move : validMoves) {
