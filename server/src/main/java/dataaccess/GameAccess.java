@@ -1,6 +1,8 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import model.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -93,6 +95,14 @@ public class GameAccess {
     public GameData endGame(int gameID) throws DataAccessException, SQLException{
         GameData game = getGame(gameID);
         game.game().gameIsOver();
+        deleteGame(gameID);
+        createGame(game);
+        return getGame(gameID);
+    }
+
+    public GameData makeMove(int gameID, ChessMove move) throws DataAccessException, SQLException, InvalidMoveException {
+        GameData game = getGame(gameID);
+        game.game().makeMove(move);
         deleteGame(gameID);
         createGame(game);
         return getGame(gameID);

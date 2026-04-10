@@ -57,7 +57,6 @@ public class ClientMain implements NotificationHandler{
             for (var i = 0; i < options.size(); i++) {
                 System.out.printf("\t%d. %s%n", i + 1, options.get(i));
             }
-            System.out.print("\n");
 
             try {
                 input = scanner.nextInt();
@@ -363,6 +362,66 @@ public class ClientMain implements NotificationHandler{
         drawBoard(gameImPlaying, endPositions, origin);
     }
 
+    private ChessMove getMove() {
+        System.out.println("Select starting row");
+        int startRow = repl(List.of(), 8);
+        System.out.println("Select starting column (indexed a=1, h=8)");
+        int startColumn = repl(List.of(), 8);
+
+        System.out.println("Select ending row");
+        int endRow = repl(List.of(), 8);
+        System.out.println("Select ending column (indexed a=1, h=8)");
+        int endColumn = repl(List.of(), 8);
+
+        ChessPiece.PieceType promotionPiece = null;
+
+        ChessPiece piece = gameImPlaying.game().getBoard().getPiece(new ChessPosition(startRow, startColumn));
+        if (piece == null) {
+            System.out.println("Please move a piece.");
+            return null;
+        }
+
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN &&
+                (endRow == 8 && Objects.equals(playerColor, "white") ||
+                (endRow == 1 && Objects.equals(playerColor, "black"))
+                )) {
+            System.out.println("Select promotion piece.");
+            int promotionNumber = repl(List.of("Queen", "Rook", "Bishop", "Knight"), 4);
+            switch (promotionNumber) {
+                case 1 -> promotionPiece = ChessPiece.PieceType.QUEEN;
+                case 2 -> promotionPiece = ChessPiece.PieceType.ROOK;
+                case 3 -> promotionPiece = ChessPiece.PieceType.BISHOP;
+                case 4 -> promotionPiece = ChessPiece.PieceType.KNIGHT;
+            }
+
+        }
+
+        return new ChessMove(new ChessPosition(startRow, startColumn), new ChessPosition(endRow, endColumn), promotionPiece);
+    }
+
+    private void makeMove() {
+        if (playerColor == null) {
+            System.out.println("You're observing; you can't make moves;");
+            return;
+        }
+        if (Objects.equals(gameImPlaying.game().getTeamTurn().toString(), playerColor)) {
+            System.out.printf("Can't do that right now; it's %s's turn!", gameImPlaying.game().getTeamTurn().toString().toLowerCase());
+            return;
+        }
+
+        ChessMove move = getMove();
+        if (move == null) {
+            return;
+        }
+
+        try {
+            System.out.println("Making move...");
+            ws.makeMove(move, authToken, gameImPlaying.gameID());
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private boolean preloginMenuItem(int option) {
         return switch (option) {
             case 1 -> {
@@ -435,10 +494,9 @@ public class ClientMain implements NotificationHandler{
                 leaveGame();
                 break;
             case 4:
-                //make move
+                makeMove();
                 break;
             case 5:
-                //do stuff
                 resign();
                 break;
             case 6:

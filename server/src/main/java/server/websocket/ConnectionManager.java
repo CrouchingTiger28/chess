@@ -27,14 +27,15 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(Session excludeSession, NotificationMessage message, int gameID) throws IOException {
+    public void broadcast(Session excludeSession, ServerMessage message, int gameID) throws IOException {
         List<Session> values = connections.get(gameID);
-        for (Session c : values)
+        for (Session c : values) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
                     c.getRemote().sendString(new Gson().toJson(message));
                 }
             }
+        }
     }
 
     public void homeBoard(Session homeSession, ServerMessage message) throws IOException{
