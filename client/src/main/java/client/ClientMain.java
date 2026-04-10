@@ -332,6 +332,7 @@ public class ClientMain implements NotificationHandler{
             ws.leaveGame(authToken, gameImPlaying.gameID());
             inGame = false;
             gameImPlaying = null;
+            playerColor = null;
         } catch (ResponseException e) {
             System.out.println("Something went wrong :(");
         }
@@ -340,6 +341,9 @@ public class ClientMain implements NotificationHandler{
     private void resign() {
         try {
             ws.resign(authToken, gameImPlaying.gameID());
+            gameImPlaying = null;
+            playerColor = null;
+            inGame = false;
         } catch (ResponseException e) {
             System.out.println("Something went wrong :(");
         }
