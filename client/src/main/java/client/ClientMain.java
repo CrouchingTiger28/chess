@@ -1,11 +1,17 @@
 package client;
 
 import chess.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import model.GameData;
 import model.GameList;
 import model.UserData;
 import websocket.ResponseException;
-import websocket.messages.Notification;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.*;
 
@@ -94,8 +100,26 @@ public class ClientMain implements NotificationHandler{
 
     }
 
-    public void notify(Notification notification) {
-        System.out.println(notification.message());
+    public void notify(String message) {
+        JsonObject jo = JsonParser.parseString(message).getAsJsonObject();
+        String type = jo.get("serverMessageType").getAsString();
+        switch (type) {
+            case "ERROR":
+                ErrorMessage errorMsg = new Gson().fromJson(message, ErrorMessage.class);
+                System.out.println(errorMsg.getMessage());
+                break;
+            case "LOAD_GAME":
+                LoadGameMessage loadMsg = new Gson().fromJson(message, LoadGameMessage.class);
+                gameImPlaying = loadMsg.getGame();
+                drawBoard(gameImPlaying, null, null);
+                break;
+            case "NOTIFICATION":
+                NotificationMessage noteMsg = new Gson().fromJson(message, NotificationMessage.class);
+                System.out.println(noteMsg.getMessage());
+                break;
+            default:
+                System.out.println("Something went wrong :(");
+        }
     }
 
     private void printHelp() {
@@ -277,7 +301,6 @@ public class ClientMain implements NotificationHandler{
         try {
             if (serverFacade.joinGame(authToken, colorName, gameID)) {
                 System.out.printf("Alright, joining game %d as %s...%n", gameNumber, colorName.toLowerCase());
-                drawBoard(game, null, null);
                 ws.joinGame(authToken, gameID);
                 inGame = true;
                 playerColor = colorName.toLowerCase();
@@ -318,8 +341,6 @@ public class ClientMain implements NotificationHandler{
     private void resign() {
         try {
             ws.resign(authToken, gameImPlaying.gameID());
-            String opponentColor = (playerColor.equalsIgnoreCase("white")) ? "black" : "white";
-            System.out.printf("You have resigned this game, and %s wins.%n", opponentColor);
         } catch (ResponseException e) {
             System.out.println("Something went wrong :(");
         }
@@ -417,6 +438,7 @@ public class ClientMain implements NotificationHandler{
                 //make move
                 break;
             case 5:
+                //do stuff
                 resign();
                 break;
             case 6:

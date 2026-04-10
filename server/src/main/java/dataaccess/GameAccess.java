@@ -89,4 +89,12 @@ public class GameAccess {
         chess.ChessGame game = gson.fromJson(rs.getString("game"), ChessGame.class);
         return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
+
+    public GameData endGame(int gameID) throws DataAccessException, SQLException{
+        GameData game = getGame(gameID);
+        game.game().gameIsOver();
+        deleteGame(gameID);
+        createGame(game);
+        return getGame(gameID);
+    }
 }

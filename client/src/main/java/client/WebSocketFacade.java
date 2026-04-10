@@ -1,18 +1,14 @@
 package client;
 
-import client.ClientMain;
-import client.NotificationHandler;
-import client.ServerFacade;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 
 import websocket.ResponseException;
 import websocket.commands.UserGameCommand;
-import websocket.messages.Notification;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Scanner;
 
 public class WebSocketFacade extends Endpoint {
     Session session;
@@ -31,8 +27,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    Notification notification = new Gson().fromJson(message, Notification.class);
-                    notificationHandler.notify(notification);
+                    notificationHandler.notify(message);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -45,6 +40,7 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         System.out.println("WebSocket Connected");
     }
+
 
     public void joinGame(String authToken, int gameID) throws ResponseException {
         try {

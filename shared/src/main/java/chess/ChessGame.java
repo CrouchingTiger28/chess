@@ -14,10 +14,12 @@ public class ChessGame {
 
     private TeamColor colorTurn;
     private ChessBoard board;
+    private Boolean gameOver;
     public ChessGame() {
         colorTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
+        gameOver = false;
     }
 
     /**
@@ -27,6 +29,13 @@ public class ChessGame {
         return colorTurn;
     }
 
+    public Boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void gameIsOver() {
+        gameOver = true;
+    }
     /**
      * Set's which teams turn it is
      *

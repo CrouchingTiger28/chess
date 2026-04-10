@@ -1,13 +1,15 @@
 package server.websocket;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
-import websocket.messages.Notification;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
     public final HashMap<Integer, List<Session>> connections = new HashMap<>();
@@ -25,15 +27,18 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(Session excludeSession, Notification notification, int gameID) throws IOException {
-        String msg = notification.toString();
+    public void broadcast(Session excludeSession, NotificationMessage message, int gameID) throws IOException {
         List<Session> values = connections.get(gameID);
-        for (Session c : values) {
+        for (Session c : values)
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
-                    c.getRemote().sendString(msg);
+                    c.getRemote().sendString(new Gson().toJson(message));
                 }
             }
-        }
     }
+
+    public void homeBoard(Session homeSession, ServerMessage message) throws IOException{
+        homeSession.getRemote().sendString(new Gson().toJson(message));
+    }
+
 }
