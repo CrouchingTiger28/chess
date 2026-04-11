@@ -26,7 +26,6 @@ public class ClientMain implements NotificationHandler{
     private final WebSocketFacade ws;
     private String playerColor = null;
     private GameData gameImPlaying = null;
-    private String banana;
 
     public ClientMain(String[] args) throws ResponseException{
         String serverUrl = "http://localhost:8080";
