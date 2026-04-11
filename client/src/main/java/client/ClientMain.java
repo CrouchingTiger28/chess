@@ -11,7 +11,6 @@ import websocket.ResponseException;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.util.*;
 
@@ -40,7 +39,7 @@ public class ClientMain implements NotificationHandler{
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
-        ClientMain self = null;
+        ClientMain self;
         try {
             self = new ClientMain(args);
         } catch (ResponseException e) {
@@ -123,10 +122,20 @@ public class ClientMain implements NotificationHandler{
 
     private void printHelp() {
         String preLoginHelp = "Select 1 to log into your account\nSelect 2 to register a new account\nSelect 3 for this help message\nSelect 4 to quit";
-        String postLoginHelp = "Select 1 for this help message\nSelect 2 to log out as this user\nSelect 3 to create a new game\n" +
-                "Select 4 to list all available games\nSelect 5 to join a preexisting game\nSelect 6 to observe someone else's game";
-        String inGameHelp = "Select 1 for this help message\nSelect 2 to redraw the chess board\nSelect 3 to leave the game without resigning\n" +
-                "Select 4 to make a move\nSelect 5 to resign the game\nSelect 6 to highlight all legal moves of a specified piece";
+        String postLoginHelp = """
+                Select 1 for this help message
+                Select 2 to log out as this user
+                Select 3 to create a new game
+                Select 4 to list all available games
+                Select 5 to join a preexisting game
+                Select 6 to observe someone else's game""";
+        String inGameHelp = """
+                Select 1 for this help message
+                Select 2 to redraw the chess board
+                Select 3 to leave the game without resigning
+                Select 4 to make a move
+                Select 5 to resign the game
+                Select 6 to highlight all legal moves of a specified piece""";
 
         if (!loggedIn) {
             System.out.println(preLoginHelp);
