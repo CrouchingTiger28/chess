@@ -71,9 +71,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             if (gameData != null && authData != null) {
                 connections.add(gameID, session);
                 String username = authData.username();
-                String color = (Objects.equals(gameData.whiteUsername(), username)) ? "white" : "black";
+                String message;
+                if (Objects.equals(gameData.whiteUsername(), username) || Objects.equals(gameData.blackUsername(), username)) {
+                    String color = (Objects.equals(gameData.whiteUsername(), username)) ? "white" : "black";
+                    message = String.format("%s has joined the game as %s", username, color);
+                } else {
+                    message = String.format("%s is observing the game.", username);
+                }
 
-                String message = String.format("%s has joined the game as %s", username, color);
                 connections.broadcast(session, new NotificationMessage(message), gameID);
                 connections.homeBoard(session, new LoadGameMessage(gameData));
             } else {

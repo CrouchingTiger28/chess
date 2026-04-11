@@ -366,7 +366,16 @@ public class ClientMain implements NotificationHandler{
         GameData game = getGame(gameNumber);
 
         System.out.printf("Alright, observing game %d from white's perspective...%n", gameNumber);
-        drawBoard(game, null, null);
+
+        try {
+            ws.joinGame(authToken, game.gameID());
+            inGame = true;
+            gameImPlaying = game;
+        } catch (ResponseException ex) {
+            throw new RuntimeException(ex);
+        } catch (NullPointerException ex) {
+            System.out.println("That game doesn't exist, sorry.\nSelect (4) to list the available games.");
+        }
     }
 
     private void leaveGame() {
