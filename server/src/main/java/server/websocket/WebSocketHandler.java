@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import service.GameService;
-import websocket.ResponseException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -30,7 +29,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final ConnectionManager connections = new ConnectionManager();
     private final AuthAccess authAccess = new AuthAccess();
     private final GameAccess gameAccess = new GameAccess();
-    private final GameService gameService = new GameService();
 
     @Override
     public void handleConnect(WsConnectContext ctx) {
@@ -128,7 +126,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     var message = String.format("%s has resigned the game, and %s has won.", username, winningColor);
                     var notificationMessage = new NotificationMessage(message);
                     connections.broadcast(session, notificationMessage, gameID);
-                    connections.remove(gameID, session);
                     connections.homeBoard(session, new NotificationMessage("You have conceded the game."));
                 }
             } else {
@@ -161,7 +158,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
                     String username = authData.username();
 
-                    var message = String.format("%s has moved %s.", username, move.toString());
+                    var message = String.format("%s has moved %s.", username, move);
                     var notificationMessage = new NotificationMessage(message);
                     var loadGameMessage = new LoadGameMessage(gameData);
                     connections.broadcast(session, notificationMessage, gameID);

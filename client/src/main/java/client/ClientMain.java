@@ -73,6 +73,39 @@ public class ClientMain implements NotificationHandler{
 
     }
 
+    private ChessPosition getSquare() {
+        String input;
+
+        while (true) {
+
+            input = scanner.next();
+
+            if (input.matches("[abcdefgh][0-9]")) {
+                String letter = Character.toString(input.charAt(0));
+                int number = Character.getNumericValue(input.charAt(1));
+
+
+                return new ChessPosition(number, convertColumnToRow(letter));
+            } else {
+                System.out.println("Invalid input. Please try again.&nInput must be a pair of a letter a-h and a number 1-8 of the form a1");
+            }
+        }
+    }
+
+    private int convertColumnToRow(String letter) {
+        return switch (letter) {
+            case "a" -> 1;
+            case "b" -> 2;
+            case "c" -> 3;
+            case "d" -> 4;
+            case "e" -> 5;
+            case "f" -> 6;
+            case "g" -> 7;
+            case "h" -> 8;
+            default -> 1;
+        };
+    }
+
     private void menu() {
         int firstChoice;
         int secondChoice;
@@ -350,22 +383,16 @@ public class ClientMain implements NotificationHandler{
     private void resign() {
         try {
             ws.resign(authToken, gameImPlaying.gameID());
-            gameImPlaying = null;
-            playerColor = null;
-            inGame = false;
         } catch (ResponseException e) {
             System.out.println("Something went wrong :(");
         }
     }
 
     private void highlightLegalMoves() {
-        System.out.println("Enter the row of the piece you wish to view the legal moves of.");
-        int row = repl(List.of(), 8);
+        System.out.println("Enter the square of the piece you wish to view the legal moves of.");
+        ChessPosition pieceSquare = getSquare();
 
-        System.out.println("Enter the column (indexed with a=1, h=8) of the piece you wish to view the legal moves of.");
-        int col = repl(List.of(), 8);
-
-        Collection<ChessMove> validMoves = gameImPlaying.game().validMoves(new ChessPosition(row, col));
+        Collection<ChessMove> validMoves = gameImPlaying.game().validMoves(pieceSquare);
         if (validMoves == null) {
             System.out.println("This is an empty square. It can't move.");
             return;
@@ -380,27 +407,23 @@ public class ClientMain implements NotificationHandler{
     }
 
     private ChessMove getMove() {
-        System.out.println("Select starting row");
-        int startRow = repl(List.of(), 8);
-        System.out.println("Select starting column (indexed a=1, h=8)");
-        int startColumn = repl(List.of(), 8);
+        System.out.println("Select starting square");
+        ChessPosition startSquare = getSquare();
 
-        System.out.println("Select ending row");
-        int endRow = repl(List.of(), 8);
-        System.out.println("Select ending column (indexed a=1, h=8)");
-        int endColumn = repl(List.of(), 8);
+        System.out.println("Select ending square");
+        ChessPosition endSquare = getSquare();
 
         ChessPiece.PieceType promotionPiece = null;
 
-        ChessPiece piece = gameImPlaying.game().getBoard().getPiece(new ChessPosition(startRow, startColumn));
+        ChessPiece piece = gameImPlaying.game().getBoard().getPiece(startSquare);
         if (piece == null) {
             System.out.println("Please move a piece.");
             return null;
         }
 
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN &&
-                (endRow == 8 && Objects.equals(playerColor, "white") ||
-                (endRow == 1 && Objects.equals(playerColor, "black"))
+                (endSquare.getRow() == 8 && Objects.equals(playerColor, "white") ||
+                (endSquare.getRow() == 1 && Objects.equals(playerColor, "black"))
                 )) {
             System.out.println("Select promotion piece.");
             int promotionNumber = repl(List.of("Queen", "Rook", "Bishop", "Knight"), 4);
@@ -413,7 +436,7 @@ public class ClientMain implements NotificationHandler{
 
         }
 
-        return new ChessMove(new ChessPosition(startRow, startColumn), new ChessPosition(endRow, endColumn), promotionPiece);
+        return new ChessMove(startSquare, endSquare, promotionPiece);
     }
 
     private void makeMove() {

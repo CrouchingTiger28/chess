@@ -5,9 +5,7 @@ import model.GameData;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 public class DrawBoard {
 
@@ -47,16 +45,16 @@ public class DrawBoard {
                 if ((column + row) % 2 != 1) {
                     out.print(EscapeSequences.SET_BG_COLOR_DARK_BROWN);
                     if (squares != null && squares.contains(new ChessPosition(row, column))) {
-                        out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                        out.print(EscapeSequences.SET_BG_COLOR_DARK_PINK);
                     } else if (origin != null && origin.equals(new ChessPosition(row, column))) {
-                        out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                        out.print(EscapeSequences.SET_BG_COLOR_DARK_ORANGE);
                     }
                 } else {
                     out.print(EscapeSequences.SET_BG_COLOR_PALE_BROWN);
                     if (squares != null && squares.contains(new ChessPosition(row, column))) {
-                        out.print(EscapeSequences.SET_BG_COLOR_GREEN);
+                        out.print(EscapeSequences.SET_BG_COLOR_PINK);
                     }   else if (origin != null && origin.equals(new ChessPosition(row, column))) {
-                        out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                        out.print(EscapeSequences.SET_BG_COLOR_ORANGE);
                     }
                 }
                 ChessPiece piece = board.getPiece(new ChessPosition(row, column));
