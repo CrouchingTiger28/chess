@@ -179,6 +179,25 @@ public class ClientMain implements NotificationHandler{
         }
     }
 
+    private Boolean getConfirm(String question) {
+        scanner.nextLine();
+        String response;
+
+        List<String> affirmative = List.of("yes", "YES", "Yes", "y", "Y");
+        List<String> negative = List.of("no", "NO", "No", "n", "N");
+
+        while (true) {
+            System.out.print("Are you sure you want to resign? (yes/no)\n");
+            response = scanner.next();
+
+            if (affirmative.contains(response)) {
+                return true;
+            } else if (negative.contains(response)) {
+                return false;
+            }
+        }
+    }
+
     private void clear() {
         scanner.nextLine();
         String response;
@@ -255,21 +274,10 @@ public class ClientMain implements NotificationHandler{
     }
 
     private boolean logout() {
-        scanner.nextLine();
-        String response;
-        List<String> affirmative = List.of("yes", "YES", "Yes", "y", "Y");
-        List<String> negative = List.of("no", "NO", "No", "n", "N");
-
-        while (authToken != null) {
-            System.out.print("Are you sure you want to log out? (yes/no)\n");
-            response = scanner.next();
-
-            if (affirmative.contains(response)) {
-                serverFacade.logout(authToken);
-                authToken = null;
-            } else if (negative.contains(response)) {
-                return false;
-            }
+        if (getConfirm("Are you sure you want to log out? (yes/no)")) {
+            serverFacade.logout(authToken);
+            loggedIn = false;
+            authToken = null;
         }
         System.out.println("Logging you out...\n");
         return true;
@@ -391,7 +399,9 @@ public class ClientMain implements NotificationHandler{
 
     private void resign() {
         try {
-            ws.resign(authToken, gameImPlaying.gameID());
+            if (getConfirm("Are you sure you want to resign? (yes/no)")) {
+                ws.resign(authToken, gameImPlaying.gameID());
+            }
         } catch (ResponseException e) {
             System.out.println("Something went wrong :(");
         }
