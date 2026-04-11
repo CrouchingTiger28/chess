@@ -193,6 +193,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } else if (game.game().isInStalemate(nowThreatened)) {
             gameAccess.endGame(game.gameID());
             connections.broadcast(null, new NotificationMessage("Uh oh, looks like a stalemate. It's a draw!"), game.gameID());
+        } else {
+            checkCheck(game, data, session);
+        }
+    }
+
+    private void checkCheck(GameData game, AuthData data, Session session) throws DataAccessException, SQLException, IOException {
+        ChessGame.TeamColor nowThreatened = (Objects.equals(game.whiteUsername(), data.username())) ?
+                ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+
+        if (game.game().isInCheck(nowThreatened)) {
+            connections.homeBoard(session, new NotificationMessage(String.format("You have put %s in check.", nowThreatened)));
+            connections.broadcast(session, new NotificationMessage(String.format("%s is now in check.", nowThreatened.toString().toLowerCase())), game.gameID());
         }
     }
 }
