@@ -96,9 +96,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             if (authData != null) {
                 String username = authData.username();
-                String changeName = (Objects.equals(gameData.whiteUsername(), username)) ? "white" : "black";
+                if (Objects.equals(gameData.whiteUsername(), username)) {
+                    gameAccess.updateGame(gameData.gameID(), "white", null);
+                } else if (Objects.equals(gameData.blackUsername(), username)) {
+                    gameAccess.updateGame(gameData.gameID(), "black", null);
+                }
 
-                gameAccess.updateGame(gameData.gameID(), changeName, null);
 
                 var message = String.format("%s has left the game", username);
                 var notificationMessage = new NotificationMessage(message);
@@ -125,13 +128,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 } else {
                     gameAccess.endGame(gameID);
 
-                    String username = authData.username();
-                    String winningColor = (Objects.equals(gameData.whiteUsername(), username)) ? "black" : "white";
+                    String losingUser = authData.username();
+                    String winningUser = (Objects.equals(gameData.whiteUsername(), losingUser)) ? gameData.blackUsername() : gameData.whiteUsername();
 
-                    var message = String.format("%s has resigned the game, and %s has won.", username, winningColor);
+                    var message = String.format("%s has resigned the game, and %s has won.", losingUser, winningUser);
                     var notificationMessage = new NotificationMessage(message);
                     connections.broadcast(session, notificationMessage, gameID);
-                    connections.homeBoard(session, new NotificationMessage("You have conceded the game."));
+                    connections.homeBoard(session, new NotificationMessage(String.format("You have conceded the game, and %s has won.", winningUser)));
                 }
             } else {
                 throw new DataAccessException("Websocket failed :/");
@@ -203,8 +206,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
 
         if (game.game().isInCheck(nowThreatened)) {
-            connections.homeBoard(session, new NotificationMessage(String.format("You have put %s in check.", nowThreatened)));
-            connections.broadcast(session, new NotificationMessage(String.format("%s is now in check.", nowThreatened.toString().toLowerCase())), game.gameID());
+            String userInCheck = (Objects.equals(nowThreatened, ChessGame.TeamColor.WHITE)) ? game.whiteUsername() : game.blackUsername();
+
+            connections.homeBoard(session, new NotificationMessage(String.format("You have put %s in check.", userInCheck)));
+            connections.broadcast(session, new NotificationMessage(String.format("%s is now in check.", userInCheck)), game.gameID());
         }
     }
 }
